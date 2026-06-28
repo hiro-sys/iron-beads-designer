@@ -1,0 +1,821 @@
+/* =============================================================================
+   Bead Pattern Maker — スタイル定義
+   -----------------------------------------------------------------------------
+   各UIコンポーネント（BEM風クラス）と全体レイアウトのスタイルを定義する。
+   - レイアウト: ヘッダー＋（設定サイドバー｜図案メイン）の2カラム。狭い画面では縦積み。
+   - 各コンポーネントは最小限のインラインスタイル（スウォッチ寸法等）を自前で持つため、
+     ここでは配置・余白・色・枠線など見た目の調整を担う。
+   ============================================================================= */
+
+:root {
+  --bg: #f5f6f8;
+  --surface: #ffffff;
+  --surface-alt: #f0f1f4;
+  --text: #1f2430;
+  --text-muted: #6b7280;
+  --border: #d7dae0;
+  --border-strong: #b6bac3;
+  --accent: #3b82f6;
+  --accent-hover: #2563eb;
+  --accent-contrast: #ffffff;
+  --danger: #d32f2f;
+  --success: #2e7d32;
+  --radius: 8px;
+  --radius-sm: 5px;
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
+
+  font-family: system-ui, 'Segoe UI', 'Hiragino Kaku Gothic ProN', Meiryo, Roboto,
+    sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--text);
+  color-scheme: light;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+button {
+  font: inherit;
+}
+
+/* ===== アプリ全体レイアウト ===== */
+
+#app {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.app__header {
+  margin-bottom: 20px;
+}
+
+.app__title {
+  font-size: 28px;
+  letter-spacing: -0.02em;
+}
+
+.app__subtitle {
+  margin: 6px 0 0;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.app__layout {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.app__sidebar {
+  flex: 0 0 340px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.app__main {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  /* メイン列をサイドバーと同じ高さまで伸ばし、内側の図案表示領域（.pattern-stage）が
+     ページ全体のスクロールに追従して sticky し続けられるようにする（要件13.2）。 */
+  align-self: stretch;
+}
+
+@media (max-width: 768px) {
+  /* 狭幅（モバイル・タブレット相当）。要件13.4 に合わせブレークポイントを 768px に統一する。
+     2カラムを縦積みに再構成し、図案メイン（.app__main）を画面上部へ sticky 固定する。
+     設定パネル（.app__sidebar）を下にスクロール・操作しても図案を常時視認できる。 */
+  .app__layout {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .app__main {
+    order: -1;
+    align-self: stretch;
+    width: 100%;
+    position: sticky;
+    top: 0;
+    max-height: 60vh;
+    overflow-y: auto;
+    background: var(--bg);
+    z-index: 2;
+  }
+  /* 縦積み時はメイン列自体が sticky になるため、内側の図案ブロックは通常フローに戻す。 */
+  .pattern-stage {
+    position: static;
+  }
+  /* 図案ビューポートを狭幅向けに低めに抑え、メイン列内に使用色一覧も収める。 */
+  .pattern-viewport {
+    max-height: 45vh;
+  }
+  .app__sidebar {
+    order: 0;
+    flex: 1 1 auto;
+    width: 100%;
+  }
+}
+
+/* ===== パネル（設定セクションの共通枠） ===== */
+
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 16px;
+}
+
+.panel__title {
+  font-size: 15px;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+}
+
+/* ===== 汎用ボタン ===== */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  transition: background-color 0.15s, border-color 0.15s, opacity 0.15s;
+}
+
+.btn:hover:not(:disabled) {
+  background: var(--surface-alt);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.btn--primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-contrast);
+  font-weight: 600;
+}
+
+.btn--primary:hover:not(:disabled) {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+
+.btn--icon {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  font-size: 20px;
+  line-height: 1;
+}
+
+/* ===== 画像アップロード（image-upload__*） ===== */
+
+.image-upload__dropzone {
+  border: 2px dashed var(--border-strong) !important;
+  border-radius: var(--radius);
+  background: var(--surface-alt);
+  transition: border-color 0.15s, background-color 0.15s;
+}
+
+.image-upload__dropzone--active {
+  border-color: var(--accent) !important;
+  background: rgba(59, 130, 246, 0.08);
+}
+
+.image-upload__label {
+  display: block;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+.image-upload__input {
+  display: block;
+  margin: 0 auto;
+  max-width: 100%;
+}
+
+.image-upload__error {
+  margin: 10px 0 0;
+  font-size: 13px;
+  color: var(--danger);
+}
+
+.image-upload__preview {
+  margin-top: 12px;
+}
+
+.image-upload__preview-img {
+  display: block;
+  max-width: 100%;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+/* 背景色ピック用プレビュー Canvas */
+.preview-canvas__wrap {
+  margin-top: 12px;
+}
+
+.preview-canvas {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: crosshair;
+}
+
+/* ===== ビーズタイプ選択（bead-type-selector__*） ===== */
+
+.bead-type-selector__options {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  margin: 0 0 12px;
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.bead-type-selector__legend {
+  font-size: 13px;
+  color: var(--text-muted);
+  padding: 0 4px;
+}
+
+.bead-type-selector__option {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.bead-type-selector__palette-heading {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.bead-type-selector__colors {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-height: 160px;
+  overflow-y: auto;
+}
+
+.bead-type-selector__color {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  padding: 3px 7px 3px 4px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+}
+
+.bead-type-selector__swatch {
+  border: 1px solid var(--border-strong);
+  border-radius: 50%;
+}
+
+/* ===== プレート構成（plate-config__*） ===== */
+
+.plate-config {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.plate-config__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.plate-config__label {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.plate-config__input {
+  width: 80px;
+  padding: 7px 8px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+}
+
+.plate-config__separator {
+  padding-bottom: 8px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+/* ===== おすすめサイズ（recommended-sizes__*） ===== */
+
+.recommended-sizes {
+  margin-top: 14px;
+}
+
+.recommended-sizes__heading {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.recommended-sizes__message {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.recommended-sizes__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.recommended-sizes__button {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+  padding: 8px 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s, background-color 0.15s;
+}
+
+.recommended-sizes__button:hover {
+  background: var(--surface-alt);
+}
+
+.recommended-sizes__button--selected {
+  border-color: var(--accent);
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.recommended-sizes__config {
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.recommended-sizes__beads,
+.recommended-sizes__scale {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* ===== 使用パレット選択（palette-selector__*） ===== */
+
+.palette-selector__heading {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+}
+
+.palette-selector__max-colors {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.palette-selector__max-colors-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.palette-selector__max-colors-input {
+  width: 90px;
+  padding: 6px 8px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+}
+
+.palette-selector__max-colors-hint {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.palette-selector__error {
+  margin: 0 0 10px;
+  font-size: 13px;
+  color: var(--danger);
+}
+
+.palette-selector__grid {
+  max-height: 180px;
+  overflow-y: auto;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-alt);
+}
+
+.palette-selector__swatch-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 7px 3px 4px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  font-size: 12px;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.palette-selector__swatch-button[aria-pressed='true'] {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent) inset;
+}
+
+.palette-selector__swatch-button--disabled {
+  background: var(--surface-alt);
+}
+
+.palette-selector__swatch {
+  border: 1px solid var(--border-strong);
+  border-radius: 50%;
+}
+
+/* ===== 背景除外（background-exclusion__*） ===== */
+
+.background-exclusion__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.background-exclusion__toggle-label {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.background-exclusion__toggle {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.background-exclusion__details {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.background-exclusion__color-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.background-exclusion__swatch {
+  border-radius: var(--radius-sm);
+}
+
+.background-exclusion__swatch-text {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.background-exclusion__hint {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.background-exclusion__threshold-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.background-exclusion__threshold-label {
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.background-exclusion__threshold {
+  flex: 1 1 auto;
+}
+
+.background-exclusion__threshold-value {
+  font-variant-numeric: tabular-nums;
+  font-size: 13px;
+  min-width: 2em;
+  text-align: right;
+}
+
+.background-exclusion__excluded-count {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* ===== 図案手動編集（pattern-editor__*） ===== */
+
+.pattern-editor__heading {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.pattern-editor__tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.pattern-editor__tool {
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  padding: 0;
+}
+
+.pattern-editor__tool--color {
+  border-radius: 50%;
+}
+
+.pattern-editor__tool--eraser {
+  padding: 6px 12px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 13px;
+}
+
+.pattern-editor__tool.is-selected {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+/* ===== リサイズ方式・フィットモード（preprocess__*） ===== */
+
+.preprocess {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.preprocess__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.preprocess__label {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.preprocess__select {
+  padding: 7px 8px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+}
+
+/* ===== 図案表示領域（常時視認・sticky / 要件13.1, 13.2） =====
+   ズーム・エクスポート操作（.pattern-controls）、メッセージ、図案ビューポート
+   （.pattern-viewport）をまとめたブロック。設定サイドバーを縦にスクロールしても、
+   この領域はビューポート上端（top: 20px）に追従し続け、図案と設定を同時に視認できる。
+   z-index と背景色は、追従中に後続の使用色一覧が背面へ潜り込んだ際の見切れを防ぐ。 */
+.pattern-stage {
+  position: sticky;
+  top: 20px;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: var(--bg);
+}
+
+/* ===== 図案表示コントロール（ズーム・エクスポート） ===== */
+
+.pattern-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 10px 14px;
+}
+
+.zoom-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.zoom-controls__level {
+  min-width: 56px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+/* ===== メッセージ（情報／エラー） ===== */
+
+.pattern-message {
+  margin: 0;
+  min-height: 0;
+  font-size: 14px;
+  transition: min-height 0.1s;
+}
+
+.pattern-message.is-visible {
+  min-height: 1.4em;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+}
+
+.pattern-message--info.is-visible {
+  background: rgba(46, 125, 50, 0.1);
+  color: var(--success);
+}
+
+.pattern-message--error.is-visible {
+  background: rgba(211, 47, 47, 0.1);
+  color: var(--danger);
+}
+
+/* ===== 図案ビューポート（スクロール可能・要件5.3） ===== */
+
+.pattern-viewport {
+  position: relative;
+  overflow: auto;
+  max-height: 70vh;
+  min-height: 240px;
+  background: var(--surface-alt);
+  background-image:
+    linear-gradient(45deg, #e2e4e9 25%, transparent 25%),
+    linear-gradient(-45deg, #e2e4e9 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #e2e4e9 75%),
+    linear-gradient(-45deg, transparent 75%, #e2e4e9 75%);
+  background-size: 20px 20px;
+  background-position: 0 0, 0 10px, 10px -10px, -10px 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pattern-canvas {
+  display: block;
+  margin: auto;
+  background: var(--surface);
+  box-shadow: 0 0 0 1px var(--border);
+  image-rendering: pixelated;
+}
+
+.pattern-empty {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 14px;
+  text-align: center;
+}
+
+/* ===== 使用色一覧（color-list__*） ===== */
+
+.panel--color-list {
+  min-height: 80px;
+}
+
+.color-list__summary {
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.color-list__items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 6px 14px;
+}
+
+.color-list__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  padding: 3px 0;
+}
+
+.color-list__swatch {
+  border: 1px solid var(--border-strong);
+  border-radius: 3px;
+  flex: 0 0 auto;
+}
+
+.color-list__name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.color-list__count {
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.color-list__unplaced {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--border);
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* ===== セル色名ツールチップ（要件5.4） ===== */
+
+.cell-tooltip {
+  position: fixed;
+  z-index: 1000;
+  pointer-events: none;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  background: rgba(31, 36, 48, 0.92);
+  color: #fff;
+  font-size: 12px;
+  line-height: 1.3;
+  white-space: nowrap;
+  box-shadow: var(--shadow);
+}
+
+.cell-tooltip[hidden] {
+  display: none;
+}

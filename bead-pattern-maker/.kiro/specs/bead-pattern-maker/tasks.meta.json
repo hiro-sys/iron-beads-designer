@@ -1,0 +1,97 @@
+{
+  "pbtResults": {
+    "6.2 減色の上限保証のプロパティテストを書く": {
+      "status": "passed",
+      "lastRunTimestamp": 1782577877642
+    },
+    "5.2 リサイズ出力サイズのプロパティテストを書く": {
+      "status": "passed",
+      "lastRunTimestamp": 1782578064488
+    },
+    "5.3 フィットモード出力寸法のプロパティテストを書く": {
+      "status": "passed",
+      "lastRunTimestamp": 1782578064534
+    },
+    "11.2 使用色一覧の正確性のプロパティテストを書く": {
+      "status": "passed",
+      "lastRunTimestamp": 1782578232071
+    },
+    "11.3 使用色ソート順のプロパティテストを書く": {
+      "status": "passed",
+      "lastRunTimestamp": 1782578233130
+    },
+    "11.4 未配置セル除外の色カウント整合性のプロパティテストを書く": {
+      "status": "passed",
+      "lastRunTimestamp": 1782578233473
+    },
+    "2.3 deltaE の数学的性質のプロパティテストを書く": {
+      "status": "passed",
+      "lastRunTimestamp": 1782578757558
+    },
+    "2.4 findClosestColor の正確性のプロパティテストを書く": {
+      "status": "passed",
+      "lastRunTimestamp": 1782578758599
+    },
+    "2.5 remapPattern のプロパティテストを書く": {
+      "status": "passed",
+      "lastRunTimestamp": 1782578759354
+    },
+    "12.3 エクスポートセルサイズ保証のプロパティテストを書く": {
+      "status": "passed",
+      "lastRunTimestamp": 1782579136352
+    },
+    "4.2 総ビーズ数計算のプロパティテストを書く": {
+      "status": "passed",
+      "lastRunTimestamp": 1782579654146
+    },
+    "4.3 空グリッド生成のプロパティテストを書く": {
+      "status": "passed",
+      "lastRunTimestamp": 1782579655203
+    },
+    "13.2 推奨サイズのアスペクト比順序と件数制限のプロパティテストを書く": {
+      "status": "passed",
+      "lastRunTimestamp": 1782579655597
+    },
+    "4.4 プレート枚数バリデーションのプロパティテストを書く": {
+      "status": "passed",
+      "lastRunTimestamp": 1782579656200
+    },
+    "4.5 ファイルバリデーションのプロパティテストを書く": {
+      "status": "passed",
+      "lastRunTimestamp": 1782579656991
+    },
+    "10.2 ズーム値クランプのプロパティテストを書く": {
+      "status": "passed",
+      "lastRunTimestamp": 1782579660267
+    },
+    "7.3 背景自動検出の一貫性のプロパティテストを書く": {
+      "status": "passed",
+      "lastRunTimestamp": 1782580576284
+    },
+    "7.4 背景除外閾値の単調性のプロパティテストを書く": {
+      "status": "passed",
+      "lastRunTimestamp": 1782580576470
+    },
+    "7.5 背景除外トグルの可逆性のプロパティテストを書く": {
+      "status": "passed",
+      "lastRunTimestamp": 1782580577843
+    },
+    "7.6 背景色の色空間整合性のプロパティテストを書く": {
+      "status": "passed",
+      "lastRunTimestamp": 1782580578005
+    },
+    "16.5 手動編集の反映と再カウントのプロパティテストを書く": {
+      "status": "passed",
+      "lastRunTimestamp": 1782581569059
+    },
+    "9.3 透明ピクセルの未配置変換のプロパティテストを書く": {
+      "status": "passed",
+      "lastRunTimestamp": 1782581733068
+    },
+    "9.4 無効色の除外のプロパティテストを書く": {
+      "status": "passed",
+      "lastRunTimestamp": 1782581733674
+    }
+  },
+  "executionHistory": {}
+}
