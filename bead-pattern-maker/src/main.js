@@ -635,3 +635,11 @@ state.subscribe(renderView);
 
 // 初期表示（図案未生成メッセージ・ズーム率など）。
 renderView();
+
+// =============================================================================
+// フッター著作権年の自動更新
+// =============================================================================
+const copyrightYearEl = document.querySelector('#copyright-year');
+if (copyrightYearEl) {
+  copyrightYearEl.textContent = new Date().getFullYear().toString();
+}
