@@ -1,0 +1,619 @@
+{
+  "pbtResults": {
+    "1.2 setGeminiApiKey のプロパティテストを書く": {
+      "status": "passed",
+      "lastRunTimestamp": 1782823981895
+    },
+    "3.2 Gemini エラー分類のプロパティテストを書く": {
+      "status": "passed",
+      "lastRunTimestamp": 1782823976533
+    },
+    "1.3 APIキー非永続化のプロパティテストを書く": {
+      "status": "passed",
+      "lastRunTimestamp": 1782824082291
+    },
+    "10.1 ローカル変換の出力一致のプロパティテストを書く": {
+      "status": "passed",
+      "lastRunTimestamp": 1782824215672
+    },
+    "4.3 出力 PatternGrid 形状のプロパティテストを書く": {
+      "status": "passed",
+      "lastRunTimestamp": 1782824428701
+    },
+    "4.5 最大色数制約のプロパティテストを書く": {
+      "status": "passed",
+      "lastRunTimestamp": 1782824437161
+    },
+    "4.4 パレット最近色正規化のプロパティテストを書く": {
+      "status": "passed",
+      "lastRunTimestamp": 1782824424796
+    },
+    "4.7 不正応答・不正入力の例外のプロパティテストを書く": {
+      "status": "passed",
+      "lastRunTimestamp": 1782824456659
+    },
+    "4.6 未配置写像規則のプロパティテストを書く": {
+      "status": "passed",
+      "lastRunTimestamp": 1782824450705
+    },
+    "7.4 APIキー秘匿のプロパティテストを書く": {
+      "status": "passed",
+      "lastRunTimestamp": 1782824804696
+    }
+  },
+  "executionHistory": {
+    "1.1 AppState に AI 関連フィールドと setter を追加する": [
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782823767997
+      },
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782823790629
+      },
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782823888833
+      }
+    ],
+    "1.2 setGeminiApiKey のプロパティテストを書く": [
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782823768114
+      },
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782823901939
+      },
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782824101567
+      }
+    ],
+    "1.3 APIキー非永続化のプロパティテストを書く": [
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782823768139
+      },
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782823902963
+      },
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782824102345
+      }
+    ],
+    "1.4 AI 関連状態のユニットテストを書く": [
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782823768161
+      },
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782823903801
+      },
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782824103236
+      }
+    ],
+    "2.1 ConversionStrategy の契約 JSDoc を非同期戻り値へ拡張する": [
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782823768191
+      },
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782823792090
+      },
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782823888855
+      }
+    ],
+    "3.1 geminiClient と GeminiApiError を実装する": [
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782823768231
+      },
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782823793220
+      },
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782823889279
+      }
+    ],
+    "3.2 Gemini エラー分類のプロパティテストを書く": [
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782823768254
+      },
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782823904644
+      },
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782824104074
+      }
+    ],
+    "3.3 geminiClient のユニットテストを書く": [
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782823768278
+      },
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782823905410
+      },
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782824104791
+      }
+    ],
+    "4.1 入力検証とリクエスト構築を実装する": [
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782823768303
+      },
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782824111698
+      },
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782824243701
+      }
+    ],
+    "4.2 応答パース・グリッド構成・出力正規化を実装する": [
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782823768327
+      },
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782824255350
+      },
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782824359613
+      }
+    ],
+    "4.3 出力 PatternGrid 形状のプロパティテストを書く": [
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782823768348
+      },
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782824365983
+      },
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782824474762
+      }
+    ],
+    "4.4 パレット最近色正規化のプロパティテストを書く": [
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782823768369
+      },
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782824368142
+      },
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782824475563
+      }
+    ],
+    "4.5 最大色数制約のプロパティテストを書く": [
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782823768390
+      },
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782824368160
+      },
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782824476367
+      }
+    ],
+    "4.6 未配置写像規則のプロパティテストを書く": [
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782823768414
+      },
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782824368599
+      },
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782824477393
+      }
+    ],
+    "4.7 不正応答・不正入力の例外のプロパティテストを書く": [
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782823768436
+      },
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782824369398
+      },
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782824478287
+      }
+    ],
+    "4.8 AIConversionStrategy のユニットテストを書く": [
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782823768460
+      },
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782824484493
+      },
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782824642328
+      }
+    ],
+    "5. チェックポイント — state・契約・通信・変換エンジンのテスト確認": [
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782823768489
+      },
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782825126851
+      },
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782825167547
+      }
+    ],
+    "6.1 変換方式セレクタを実装する": [
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782823768515
+      },
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782824112562
+      },
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782824241876
+      }
+    ],
+    "6.2 APIキー設定UIを実装する": [
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782823768538
+      },
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782824113398
+      },
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782824241163
+      }
+    ],
+    "6.3 画像送信同意ダイアログを実装する": [
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782823768561
+      },
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782824114267
+      },
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782824242781
+      }
+    ],
+    "6.4 AI 関連パネルを index.html に配置する": [
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782823768584
+      },
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782824256136
+      },
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782824358722
+      }
+    ],
+    "7.1 runAiConversion と変換方式ディスパッチを結線する": [
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782823768607
+      },
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782824485360
+      },
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782824641526
+      }
+    ],
+    "7.2 messageForAiError を実装する": [
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782823768628
+      },
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782824649587
+      },
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782824721398
+      }
+    ],
+    "7.3 ディスパッチ・runAiConversion のユニットテストを書く": [
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782823768649
+      },
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782824727493
+      },
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782825022314
+      }
+    ],
+    "7.4 APIキー秘匿のプロパティテストを書く": [
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782823768671
+      },
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782824728324
+      },
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782825021653
+      }
+    ],
+    "8.1 AI 由来データの表示面防御を実装・確認する": [
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782823768704
+      },
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782824729285
+      },
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782825023331
+      }
+    ],
+    "9. チェックポイント — UI・結線・セキュリティのテスト確認": [
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782823768726
+      },
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782825173850
+      },
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782825228136
+      }
+    ],
+    "10.1 ローカル変換の出力一致のプロパティテストを書く": [
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782823768748
+      },
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782824115119
+      },
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782824240241
+      }
+    ],
+    "11.1 変換方式非依存の統合テストを書く": [
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782823768769
+      },
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782825029825
+      },
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782825115217
+      }
+    ],
+    "12. 最終チェックポイント — 全テスト確認と結線確認": [
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782823768790
+      },
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782825235269
+      },
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782825373417
+      }
+    ],
+    "2. 変換 Strategy 契約の非同期拡張（後方互換）": [
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782823888885
+      }
+    ],
+    "1. state.js の拡張とAPIキー管理（非永続化）": [
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782824103278
+      }
+    ],
+    "3. Gemini API クライアント（geminiClient.js）": [
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782824104820
+      }
+    ],
+    "10. 後方互換の回帰テスト": [
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782824240283
+      }
+    ],
+    "6. AI 関連UIコンポーネント": [
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782824358753
+      }
+    ],
+    "4. AIConversionStrategy（出力正規化の中核）": [
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782824642357
+      }
+    ],
+    "7. main.js への結線（ディスパッチ・AI実行フロー・エラー処理）": [
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782825022341
+      }
+    ],
+    "8. セキュリティ実装（表示面防御・プロンプトインジェクション対策）": [
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782825023361
+      }
+    ],
+    "11. 統合（変換方式に依存しない下流の動作確認）": [
+      {
+        "executionId": "ad341037-4258-4642-a13a-dd4e506b2103",
+        "chatSessionId": "sess_f1de7417-8510-413d-b249-ee69a4650759",
+        "timestamp": 1782825115251
+      }
+    ]
+  }
+}

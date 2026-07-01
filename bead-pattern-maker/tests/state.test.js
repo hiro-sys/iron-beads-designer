@@ -7,6 +7,9 @@ import {
   ZOOM_MIN,
   ZOOM_MAX,
   ZOOM_DEFAULT,
+  VALID_INPUT_MODES,
+  VALID_GEMINI_MODELS,
+  GEMINI_MODELS,
 } from '../src/state.js';
 
 // =============================================================================
@@ -136,6 +139,13 @@ describe('state ユニットテスト（タスク10.3）', () => {
         disabledColorIds: [],
         maxColors: null, // 要件11.3: 初期は制限なし
         editTool: { type: 'paint', color: null },
+        // 入力方法・AI生成関連（メモリのみ）
+        inputMode: 'image',
+        geminiApiKey: null,
+        geminiModel: 'gemini-2.5-flash',
+        aiProcessing: false,
+        lastAiPattern: null,
+        aiPrompt: '',
       });
     });
 
@@ -491,5 +501,508 @@ describe('state ユニットテスト（タスク10.3）', () => {
       expect(() => store.subscribe(null)).toThrow(TypeError);
       expect(() => store.subscribe(123)).toThrow(TypeError);
     });
+  });
+});
+
+// =============================================================================
+// タスク1.1: AI関連フィールド・setterのユニットテスト
+// **検証対象: Requirements 1.2, 1.3, 3.5, 3.6, 5.1, 5.2, 5.4, 5.5, 5.6, 6.5, 6.6, 8.3, 8.4**
+// =============================================================================
+describe('state AI関連フィールドのユニットテスト（タスク1.1）', () => {
+  // ---------------------------------------------------------------------------
+  // createInitialState のAI関連初期値
+  // ---------------------------------------------------------------------------
+  describe('createInitialState AI関連初期値', () => {
+    it('入力方法・AI関連フィールドの初期値が正しい', () => {
+      const initial = createInitialState();
+      expect(initial.inputMode).toBe('image');
+      expect(initial.geminiApiKey).toBeNull();
+      expect(initial.geminiModel).toBe('gemini-2.5-flash');
+      expect(initial.aiProcessing).toBe(false);
+      expect(initial.lastAiPattern).toBeNull();
+      expect(initial.aiPrompt).toBe('');
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // VALID_INPUT_MODES 定数
+  // ---------------------------------------------------------------------------
+  describe('VALID_INPUT_MODES', () => {
+    it("'image' と 'prompt' のみを含む", () => {
+      expect(VALID_INPUT_MODES).toEqual(['image', 'prompt']);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // setInputMode（入力方法）
+  // ---------------------------------------------------------------------------
+  describe('setInputMode（入力方法）', () => {
+    it("'prompt' を設定できる", () => {
+      const store = createAppState();
+      store.setInputMode('prompt');
+      expect(store.inputMode).toBe('prompt');
+    });
+
+    it("'image' を設定できる", () => {
+      const store = createAppState();
+      store.setInputMode('prompt');
+      store.setInputMode('image');
+      expect(store.inputMode).toBe('image');
+    });
+
+    it("不正な値は無視する（旧変換方式の値 'local'/'ai' も無効）", () => {
+      const store = createAppState();
+      store.setInputMode('invalid');
+      expect(store.inputMode).toBe('image');
+      store.setInputMode('');
+      expect(store.inputMode).toBe('image');
+      store.setInputMode(null);
+      expect(store.inputMode).toBe('image');
+      store.setInputMode(undefined);
+      expect(store.inputMode).toBe('image');
+      store.setInputMode('local');
+      expect(store.inputMode).toBe('image');
+      store.setInputMode('ai');
+      expect(store.inputMode).toBe('image');
+    });
+
+    it("変化時にリスナーへ通知する", () => {
+      const store = createAppState();
+      const listener = vi.fn();
+      store.subscribe(listener);
+      store.setInputMode('prompt');
+      expect(listener).toHaveBeenCalledTimes(1);
+      expect(listener.mock.calls[0][0].inputMode).toBe('prompt');
+    });
+
+    it("同じ値を設定しても通知しない", () => {
+      const store = createAppState();
+      const listener = vi.fn();
+      store.subscribe(listener);
+      store.setInputMode('image'); // 初期値と同じ
+      expect(listener).not.toHaveBeenCalled();
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // VALID_GEMINI_MODELS 定数
+  // ---------------------------------------------------------------------------
+  describe('VALID_GEMINI_MODELS', () => {
+    it('テキスト→JSON生成対応の汎用モデルID一覧を含む', () => {
+      expect(VALID_GEMINI_MODELS).toEqual([
+        'gemini-2.5-flash',
+        'gemini-3.1-flash-lite',
+        'gemini-2.5-flash-lite',
+        'gemini-2.0-flash',
+        'gemini-2.0-flash-lite',
+        'gemini-2.5-pro',
+        'gemini-3.1-pro',
+      ]);
+    });
+
+    it('既定値（gemini-2.5-flash）が許可リストに含まれる', () => {
+      expect(VALID_GEMINI_MODELS).toContain('gemini-2.5-flash');
+    });
+
+    it('GEMINI_MODELS.map((m) => m.id) から導出される', () => {
+      expect(VALID_GEMINI_MODELS).toEqual(GEMINI_MODELS.map((m) => m.id));
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // GEMINI_MODELS 構造化データ
+  // ---------------------------------------------------------------------------
+  describe('GEMINI_MODELS', () => {
+    it('配列であり、各要素が id/label/freeTier を持つ', () => {
+      expect(Array.isArray(GEMINI_MODELS)).toBe(true);
+      expect(GEMINI_MODELS.length).toBeGreaterThan(0);
+      for (const model of GEMINI_MODELS) {
+        expect(typeof model.id).toBe('string');
+        expect(model.id.length).toBeGreaterThan(0);
+        expect(typeof model.label).toBe('string');
+        expect(model.label.length).toBeGreaterThan(0);
+        expect(typeof model.freeTier).toBe('boolean');
+      }
+    });
+
+    it('無料枠（freeTier=true）に gemini-2.5-flash と gemini-2.5-flash-lite を含む', () => {
+      const freeTierIds = GEMINI_MODELS.filter((m) => m.freeTier).map((m) => m.id);
+      expect(freeTierIds).toContain('gemini-2.5-flash');
+      expect(freeTierIds).toContain('gemini-2.5-flash-lite');
+    });
+
+    it('id 一覧が VALID_GEMINI_MODELS と一致する', () => {
+      expect(GEMINI_MODELS.map((m) => m.id)).toEqual(VALID_GEMINI_MODELS);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // setGeminiModel（モデル切り替え）
+  // ---------------------------------------------------------------------------
+  describe('setGeminiModel（モデル切り替え）', () => {
+    it('許可リストの有効なモデルを反映する', () => {
+      const store = createAppState();
+      store.setGeminiModel('gemini-2.5-flash-lite');
+      expect(store.geminiModel).toBe('gemini-2.5-flash-lite');
+
+      store.setGeminiModel('gemini-2.0-flash');
+      expect(store.geminiModel).toBe('gemini-2.0-flash');
+
+      store.setGeminiModel('gemini-2.0-flash-lite');
+      expect(store.geminiModel).toBe('gemini-2.0-flash-lite');
+
+      store.setGeminiModel('gemini-2.5-pro');
+      expect(store.geminiModel).toBe('gemini-2.5-pro');
+
+      store.setGeminiModel('gemini-2.5-flash');
+      expect(store.geminiModel).toBe('gemini-2.5-flash');
+    });
+
+    it('gemini-3.1-pro を有効値として設定できる', () => {
+      const store = createAppState();
+      store.setGeminiModel('gemini-3.1-pro');
+      expect(store.geminiModel).toBe('gemini-3.1-pro');
+    });
+
+    it('許可リスト以外の値は無視する（直前値を維持）', () => {
+      const store = createAppState();
+      // 初期値は gemini-2.5-flash
+      store.setGeminiModel('gemini-1.5-pro'); // 許可外
+      expect(store.geminiModel).toBe('gemini-2.5-flash');
+
+      store.setGeminiModel('invalid-model');
+      expect(store.geminiModel).toBe('gemini-2.5-flash');
+
+      store.setGeminiModel('');
+      expect(store.geminiModel).toBe('gemini-2.5-flash');
+
+      store.setGeminiModel(null);
+      expect(store.geminiModel).toBe('gemini-2.5-flash');
+
+      store.setGeminiModel(undefined);
+      expect(store.geminiModel).toBe('gemini-2.5-flash');
+    });
+
+    it('変化時にリスナーへ通知する', () => {
+      const store = createAppState();
+      const listener = vi.fn();
+      store.subscribe(listener);
+      store.setGeminiModel('gemini-2.0-flash');
+      expect(listener).toHaveBeenCalledTimes(1);
+      expect(listener.mock.calls[0][0].geminiModel).toBe('gemini-2.0-flash');
+    });
+
+    it('同じ値を設定しても通知しない', () => {
+      const store = createAppState();
+      const listener = vi.fn();
+      store.subscribe(listener);
+      store.setGeminiModel('gemini-2.5-flash'); // 初期値と同じ
+      expect(listener).not.toHaveBeenCalled();
+    });
+
+    it('許可外の値で拒否されたとき通知しない', () => {
+      const store = createAppState();
+      const listener = vi.fn();
+      store.subscribe(listener);
+      store.setGeminiModel('not-a-real-model');
+      expect(listener).not.toHaveBeenCalled();
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // setGeminiApiKey（要件3.5/3.6）
+  // ---------------------------------------------------------------------------
+  describe('setGeminiApiKey（要件3.5/3.6）', () => {
+    it("trim後1文字以上ならキーを保持して true を返す", () => {
+      const store = createAppState();
+      const result = store.setGeminiApiKey('  my-key-123  ');
+      expect(result).toBe(true);
+      expect(store.geminiApiKey).toBe('my-key-123');
+    });
+
+    it("空文字は false を返し、キーを変更しない", () => {
+      const store = createAppState();
+      store.setGeminiApiKey('existing-key');
+      const result = store.setGeminiApiKey('');
+      expect(result).toBe(false);
+      expect(store.geminiApiKey).toBe('existing-key');
+    });
+
+    it("空白のみは false を返し、キーを変更しない", () => {
+      const store = createAppState();
+      store.setGeminiApiKey('existing-key');
+      const result = store.setGeminiApiKey('   ');
+      expect(result).toBe(false);
+      expect(store.geminiApiKey).toBe('existing-key');
+    });
+
+    it("非文字列を渡すと false を返し、キーを変更しない", () => {
+      const store = createAppState();
+      store.setGeminiApiKey('existing-key');
+      expect(store.setGeminiApiKey(null)).toBe(false);
+      expect(store.setGeminiApiKey(undefined)).toBe(false);
+      expect(store.setGeminiApiKey(123)).toBe(false);
+      expect(store.geminiApiKey).toBe('existing-key');
+    });
+
+    it("キー設定時にリスナーへ通知する", () => {
+      const store = createAppState();
+      const listener = vi.fn();
+      store.subscribe(listener);
+      store.setGeminiApiKey('key-abc');
+      expect(listener).toHaveBeenCalledTimes(1);
+      expect(listener.mock.calls[0][0].geminiApiKey).toBe('key-abc');
+    });
+
+    it("空白のみで拒否されたとき通知しない", () => {
+      const store = createAppState();
+      const listener = vi.fn();
+      store.subscribe(listener);
+      store.setGeminiApiKey('  ');
+      expect(listener).not.toHaveBeenCalled();
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // clearGeminiApiKey（要件5.5/5.6）
+  // ---------------------------------------------------------------------------
+  describe('clearGeminiApiKey（要件5.5/5.6）', () => {
+    it("キーを null に破棄する", () => {
+      const store = createAppState();
+      store.setGeminiApiKey('my-key');
+      store.clearGeminiApiKey();
+      expect(store.geminiApiKey).toBeNull();
+    });
+
+    it("破棄時にリスナーへ通知する", () => {
+      const store = createAppState();
+      store.setGeminiApiKey('key-xyz');
+      const listener = vi.fn();
+      store.subscribe(listener);
+      store.clearGeminiApiKey();
+      expect(listener).toHaveBeenCalledTimes(1);
+      expect(listener.mock.calls[0][0].geminiApiKey).toBeNull();
+    });
+
+    it("既に null のときは通知しない", () => {
+      const store = createAppState();
+      const listener = vi.fn();
+      store.subscribe(listener);
+      store.clearGeminiApiKey(); // 初期値 null → null
+      expect(listener).not.toHaveBeenCalled();
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // setAiProcessing（要件8.3/8.4）
+  // ---------------------------------------------------------------------------
+  describe('setAiProcessing（要件8.3/8.4）', () => {
+    it("true を設定できる", () => {
+      const store = createAppState();
+      store.setAiProcessing(true);
+      expect(store.aiProcessing).toBe(true);
+    });
+
+    it("false を設定できる", () => {
+      const store = createAppState();
+      store.setAiProcessing(true);
+      store.setAiProcessing(false);
+      expect(store.aiProcessing).toBe(false);
+    });
+
+    it("truthy/falsy 値は Boolean に変換される", () => {
+      const store = createAppState();
+      store.setAiProcessing('yes');
+      expect(store.aiProcessing).toBe(true);
+      store.setAiProcessing('');
+      expect(store.aiProcessing).toBe(false);
+    });
+
+    it("変化時にリスナーへ通知する", () => {
+      const store = createAppState();
+      const listener = vi.fn();
+      store.subscribe(listener);
+      store.setAiProcessing(true);
+      expect(listener).toHaveBeenCalledTimes(1);
+    });
+
+    it("同じ値を設定しても通知しない", () => {
+      const store = createAppState();
+      const listener = vi.fn();
+      store.subscribe(listener);
+      store.setAiProcessing(false); // 初期値と同じ
+      expect(listener).not.toHaveBeenCalled();
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // setLastAiPattern
+  // ---------------------------------------------------------------------------
+  describe('setLastAiPattern', () => {
+    it("PatternGrid を設定・取得できる", () => {
+      const store = createAppState();
+      const mockPattern = { width: 29, height: 29, cells: [] };
+      store.setLastAiPattern(mockPattern);
+      expect(store.lastAiPattern).toBe(mockPattern);
+    });
+
+    it("null を設定して消去できる", () => {
+      const store = createAppState();
+      store.setLastAiPattern({ width: 29, height: 29, cells: [] });
+      store.setLastAiPattern(null);
+      expect(store.lastAiPattern).toBeNull();
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // setAiPrompt（お題テキスト）
+  // ---------------------------------------------------------------------------
+  describe('setAiPrompt（お題テキスト）', () => {
+    it("文字列をそのまま反映する", () => {
+      const store = createAppState();
+      store.setAiPrompt('ねこ');
+      expect(store.aiPrompt).toBe('ねこ');
+
+      store.setAiPrompt('ハート');
+      expect(store.aiPrompt).toBe('ハート');
+    });
+
+    it("空文字を設定できる", () => {
+      const store = createAppState();
+      store.setAiPrompt('ねこ');
+      store.setAiPrompt('');
+      expect(store.aiPrompt).toBe('');
+    });
+
+    it("非文字列は '' に正規化する", () => {
+      const store = createAppState();
+      store.setAiPrompt('ねこ');
+      store.setAiPrompt(null);
+      expect(store.aiPrompt).toBe('');
+
+      store.setAiPrompt('ねこ');
+      store.setAiPrompt(undefined);
+      expect(store.aiPrompt).toBe('');
+
+      store.setAiPrompt('ねこ');
+      store.setAiPrompt(123);
+      expect(store.aiPrompt).toBe('');
+    });
+
+    it("変化時にリスナーへ通知する", () => {
+      const store = createAppState();
+      const listener = vi.fn();
+      store.subscribe(listener);
+      store.setAiPrompt('ねこ');
+      expect(listener).toHaveBeenCalledTimes(1);
+      expect(listener.mock.calls[0][0].aiPrompt).toBe('ねこ');
+    });
+
+    it("同じ値を設定しても通知しない", () => {
+      const store = createAppState();
+      const listener = vi.fn();
+      store.subscribe(listener);
+      store.setAiPrompt(''); // 初期値と同じ
+      expect(listener).not.toHaveBeenCalled();
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // getState スナップショットへの反映
+  // ---------------------------------------------------------------------------
+  describe('getState スナップショットへの反映', () => {
+    it("入力方法・AI関連フィールドがスナップショットに含まれる", () => {
+      const store = createAppState();
+      store.setInputMode('prompt');
+      store.setGeminiApiKey('test-key');
+      store.setGeminiModel('gemini-2.5-flash');
+      store.setAiProcessing(true);
+      store.setLastAiPattern({ width: 10, height: 10, cells: [] });
+      store.setAiPrompt('ねこ');
+
+      const snapshot = store.getState();
+      expect(snapshot.inputMode).toBe('prompt');
+      expect(snapshot.geminiApiKey).toBe('test-key');
+      expect(snapshot.geminiModel).toBe('gemini-2.5-flash');
+      expect(snapshot.aiProcessing).toBe(true);
+      expect(snapshot.lastAiPattern).toEqual({ width: 10, height: 10, cells: [] });
+      expect(snapshot.aiPrompt).toBe('ねこ');
+    });
+
+    it("スナップショットは内部状態のコピーであり直接変更に影響されない", () => {
+      const store = createAppState();
+      store.setGeminiApiKey('original-key');
+      const snapshot = store.getState();
+      // スナップショットの値を変更しても内部状態は変わらない
+      snapshot.geminiApiKey = 'tampered';
+      expect(store.geminiApiKey).toBe('original-key');
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // 非永続化の確認（メモリのみ・要件5.1/5.2）
+  // ---------------------------------------------------------------------------
+  describe('非永続化（要件5.1/5.2）', () => {
+    it("APIキー設定後も localStorage / sessionStorage に書き込まない", () => {
+      // テスト環境で storage の setItem を監視
+      const localSpy = vi.spyOn(Storage.prototype, 'setItem');
+
+      const store = createAppState();
+      store.setGeminiApiKey('secret-key-123');
+      store.setInputMode('prompt');
+
+      // setItem が一度も呼ばれていないことを確認
+      expect(localSpy).not.toHaveBeenCalled();
+      localSpy.mockRestore();
+    });
+  });
+});
+
+// =============================================================================
+// タスク1.4: createInitialState() リロード相当リセットの検証
+// AI関連状態を変更した後、createInitialState() が初期値に戻ることを確認する。
+// **検証対象: Requirements 1.2, 5.1, 6.6, 8.3**
+// =============================================================================
+describe('createInitialState() リロード相当リセットの検証（タスク1.4）', () => {
+  it('AI関連フィールドを変更後、createInitialState() は初期値（geminiApiKey=null, inputMode=image）を返す', () => {
+    // ストアを作成して 入力方法・AI 関連の状態をすべて変更する
+    const store = createAppState();
+    store.setInputMode('prompt');
+    store.setGeminiApiKey('my-secret-key');
+    store.setAiProcessing(true);
+    store.setLastAiPattern({ width: 29, height: 29, cells: [[]] });
+
+    // 変更が反映されていることを確認
+    expect(store.inputMode).toBe('prompt');
+    expect(store.geminiApiKey).toBe('my-secret-key');
+    expect(store.aiProcessing).toBe(true);
+    expect(store.lastAiPattern).not.toBeNull();
+
+    // createInitialState() はリロード相当: すべて初期値に戻る
+    const fresh = createInitialState();
+    expect(fresh.inputMode).toBe('image');
+    expect(fresh.geminiApiKey).toBeNull();
+    expect(fresh.aiProcessing).toBe(false);
+    expect(fresh.lastAiPattern).toBeNull();
+  });
+
+  it('createInitialState() で新しいストアを生成すると以前のストアの状態に影響されない', () => {
+    // 1つ目のストアで状態を変更
+    const store1 = createAppState();
+    store1.setInputMode('prompt');
+    store1.setGeminiApiKey('key-store1');
+
+    // 2つ目のストアを生成（リロード相当）
+    const store2 = createAppState();
+
+    // 2つ目は初期値であること
+    expect(store2.inputMode).toBe('image');
+    expect(store2.geminiApiKey).toBeNull();
+    expect(store2.aiProcessing).toBe(false);
+    expect(store2.lastAiPattern).toBeNull();
+
+    // 1つ目は変更が維持されていること
+    expect(store1.inputMode).toBe('prompt');
+    expect(store1.geminiApiKey).toBe('key-store1');
   });
 });
