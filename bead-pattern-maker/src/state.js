@@ -23,6 +23,10 @@
  */
 
 /**
+ * @typedef {'image' | 'prompt'} InputMode
+ */
+
+/**
  * @typedef {Object} BackgroundExclusionState
  * @property {boolean} enabled - 背景除外の有効/無効（初期値: false、要件9.8）
  * @property {{r: number, g: number, b: number}|null} color - 検出/選択された背景色（生ピクセル色）
@@ -50,6 +54,12 @@
  * @property {string[]} disabledColorIds - 無効化された色ID
  * @property {number|null} maxColors - 最大色数（null = 制限なし）
  * @property {EditTool} editTool - 手動編集の現在のツール
+ * @property {InputMode} inputMode - 入力方法（'image'=画像から / 'prompt'=AIお題から・初期値: 'image'）
+ * @property {string|null} geminiApiKey - APIキー（セッションメモリのみ・初期値: null・要件5.1/5.4）
+ * @property {string} geminiModel - 使用する Gemini モデル（セッションメモリのみ・初期値: 'gemini-2.5-flash'）
+ * @property {boolean} aiProcessing - AI処理中フラグ（初期値: false・要件8.3/8.4）
+ * @property {object|null} lastAiPattern - 直近のAI変換結果（初期値: null・要件8.2）
+ * @property {string} aiPrompt - お題テキスト（AIお題生成のモチーフ・初期値: ''・メモリのみ）
  */
 
 // --- ズーム範囲の定数（要件5.3 / Property 9） -------------------------------
@@ -65,6 +75,43 @@ const VALID_BEAD_TYPES = ['perler', 'nano'];
 const VALID_RESIZE_METHODS = ['smooth', 'sharp'];
 const VALID_FIT_MODES = ['stretch', 'contain', 'cover'];
 const VALID_EDIT_TOOL_TYPES = ['paint', 'erase'];
+/** 入力方法の許可リスト（'image'=画像から / 'prompt'=AIお題から）。 */
+export const VALID_INPUT_MODES = ['image', 'prompt'];
+
+/**
+ * @typedef {Object} GeminiModelOption
+ * @property {string} id - APIモデルID（`models/` に続く識別子。generateContent に渡す）
+ * @property {string} label - UI表示用のモデル名
+ * @property {boolean} freeTier - 無料枠で利用できるか
+ */
+
+/**
+ * 選択可能な Gemini モデル定義（お題テキスト生成 generateFromText 用）。
+ *
+ * 掲載するのは「テキスト入力 → 構造化JSON出力ができる汎用モデル」のみ。
+ *
+ * 新しいモデル（例: Gemini 3.x 系）を追加する場合は、Google AI Studio / 公式
+ * ドキュメントで正確なAPIモデルID（`models/` に続く識別子）を確認し、id・label・
+ * freeTier をここに1行追記してください。TTS・音声・Live・Robotics・Embedding など、
+ * テキスト→JSON生成に使えないモデルは掲載しないこと。
+ * @type {GeminiModelOption[]}
+ */
+export const GEMINI_MODELS = [
+  { id: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash', freeTier: true },
+  { id: 'gemini-3.1-flash-lite', label: 'Gemini 3.1 Flash-Lite', freeTier: true },
+  { id: 'gemini-2.5-flash-lite', label: 'Gemini 2.5 Flash-Lite', freeTier: true },
+  { id: 'gemini-2.0-flash', label: 'Gemini 2.0 Flash', freeTier: false },
+  { id: 'gemini-2.0-flash-lite', label: 'Gemini 2.0 Flash-Lite', freeTier: false },
+  { id: 'gemini-2.5-pro', label: 'Gemini 2.5 Pro', freeTier: false },
+  { id: 'gemini-3.1-pro', label: 'Gemini 3.1 Pro', freeTier: false },
+];
+
+/**
+ * 選択可能な Gemini モデルIDの許可リスト（不正値ガード用）。
+ * GEMINI_MODELS の id から導出する。
+ * @type {string[]}
+ */
+export const VALID_GEMINI_MODELS = GEMINI_MODELS.map((m) => m.id);
 
 /** 背景除外のΔE閾値の範囲（要件9.4）。 */
 const THRESHOLD_MIN = 0;
@@ -170,6 +217,14 @@ export function createInitialState() {
     disabledColorIds: [],
     maxColors: null,
     editTool: { type: 'paint', color: null },
+    // --- 入力方法・AI生成関連フィールド（メモリのみ保持・永続化しない） ---
+    inputMode: 'image',
+    geminiApiKey: null,
+    geminiModel: 'gemini-2.5-flash',
+    aiProcessing: false,
+    lastAiPattern: null,
+    // お題テキスト（AIお題生成のモチーフ）。メモリのみ・永続化しない。
+    aiPrompt: '',
   };
 }
 
@@ -218,6 +273,12 @@ export function createAppState(overrides = {}) {
       disabledColorIds: [...state.disabledColorIds],
       maxColors: state.maxColors,
       editTool: { ...state.editTool },
+      inputMode: state.inputMode,
+      geminiApiKey: state.geminiApiKey,
+      geminiModel: state.geminiModel,
+      aiProcessing: state.aiProcessing,
+      lastAiPattern: state.lastAiPattern,
+      aiPrompt: state.aiPrompt,
     };
   }
 
@@ -450,6 +511,83 @@ export function createAppState(overrides = {}) {
     notify();
   }
 
+  // --- 入力方法・AI生成関連の setter（メモリのみ・永続化しない） -----------------------
+
+  /**
+   * 入力方法を設定する。'image'（画像から）/ 'prompt'（AIお題から）以外は無視する。
+   * @param {InputMode} mode - 入力方法
+   */
+  function setInputMode(mode) {
+    if (!VALID_INPUT_MODES.includes(mode)) {
+      return;
+    }
+    setField('inputMode', mode);
+  }
+
+  /**
+   * APIキーを設定する（要件3.5/3.6）。前後の空白を除去し、1文字以上なら保持する。
+   * 空文字・空白のみの場合は現在のキーを変更せず false を返す。
+   * いかなる永続ストレージにも書き込まない（メモリのみ・要件5.1/5.2）。
+   * @param {string} rawKey - 入力された生のキー
+   * @returns {boolean} 設定できたら true、空白のみで変更しなかったら false
+   */
+  function setGeminiApiKey(rawKey) {
+    const trimmed = (typeof rawKey === 'string') ? rawKey.trim() : '';
+    if (trimmed.length === 0) {
+      return false;
+    }
+    setField('geminiApiKey', trimmed);
+    return true;
+  }
+
+  /**
+   * APIキーを破棄し、AI変換不可状態に戻す（要件5.5/5.6）。
+   * いかなる永続ストレージにも書き込まない（メモリのみ）。
+   */
+  function clearGeminiApiKey() {
+    setField('geminiApiKey', null);
+  }
+
+  /**
+   * 使用する Gemini モデルを設定する。
+   * 許可リスト（VALID_GEMINI_MODELS）以外の値は無視する。変化時のみ通知する。
+   * いかなる永続ストレージにも書き込まない（メモリのみ）。
+   * @param {string} model - モデル名（例: 'gemini-2.5-flash'）
+   */
+  function setGeminiModel(model) {
+    if (!VALID_GEMINI_MODELS.includes(model)) {
+      return;
+    }
+    setField('geminiModel', model);
+  }
+
+  /**
+   * AI処理中フラグを設定する（要件8.3/8.4）。
+   * 実行ボタンの有効/無効制御に用いる。
+   * @param {boolean} processing - 処理中か
+   */
+  function setAiProcessing(processing) {
+    setField('aiProcessing', Boolean(processing));
+  }
+
+  /**
+   * 直近のAI変換結果を設定する（要件8.2の維持表示用）。
+   * @param {object|null} pattern - AI変換の結果PatternGrid
+   */
+  function setLastAiPattern(pattern) {
+    setField('lastAiPattern', pattern ?? null);
+  }
+
+  /**
+   * お題テキスト（AIお題生成のモチーフ）を設定する。
+   * 文字列ならそのまま保持し、非文字列は '' に正規化する。変化時のみ通知する。
+   * いかなる永続ストレージにも書き込まない（メモリのみ）。
+   * @param {string} text - お題テキスト（例「ねこ」「ハート」）
+   */
+  function setAiPrompt(text) {
+    setField('aiPrompt', typeof text === 'string' ? text : '');
+  }
+
   return {
     // --- getter（現在値の読み取り） ---
     get beadType() {
@@ -488,6 +626,24 @@ export function createAppState(overrides = {}) {
     get editTool() {
       return state.editTool;
     },
+    get inputMode() {
+      return state.inputMode;
+    },
+    get geminiApiKey() {
+      return state.geminiApiKey;
+    },
+    get geminiModel() {
+      return state.geminiModel;
+    },
+    get aiProcessing() {
+      return state.aiProcessing;
+    },
+    get lastAiPattern() {
+      return state.lastAiPattern;
+    },
+    get aiPrompt() {
+      return state.aiPrompt;
+    },
 
     // --- 状態スナップショット / 購読 ---
     getState,
@@ -506,5 +662,12 @@ export function createAppState(overrides = {}) {
     setDisabledColorIds,
     setMaxColors,
     setEditTool,
+    setInputMode,
+    setGeminiApiKey,
+    clearGeminiApiKey,
+    setGeminiModel,
+    setAiProcessing,
+    setLastAiPattern,
+    setAiPrompt,
   };
 }

@@ -72,15 +72,42 @@
  */
 
 /**
+ * 背景除外オプション。
+ * @typedef {Object} BackgroundExclusionOption
+ * @property {boolean} enabled - 背景除外が有効か
+ * @property {number} [threshold] - 背景判定の閾値
+ */
+
+/**
+ * AI変換オプション。基底の ConversionOptions を拡張し、AI固有のパラメータを追加する。
+ *
+ * `LocalConversionStrategy` は従来どおり `ConversionOptions` のみを受け取り、
+ * `AIConversionStrategy` は本型を受け取る。
+ *
+ * @typedef {ConversionOptions & {
+ *   beadType?: BeadType,
+ *   plateConfig?: { cols: number, rows: number },
+ *   backgroundExclusion?: BackgroundExclusionOption,
+ *   apiKey: string,
+ *   model?: string,
+ *   timeoutMs?: number,
+ *   signal?: AbortSignal,
+ * }} AIConversionOptions
+ */
+
+/**
  * 変換 Strategy の中核となる変換関数の契約。
  *
  * すべての変換 Strategy はこのシグネチャに従う `convert` を提供し、元画像と
  * 変換オプションから図案グリッドを生成して返す。
  *
+ * 同期（ローカル変換）と非同期（AI変換）の両方を許容する。呼び出し側は
+ * `await Promise.resolve(strategy.convert(...))` で統一的に扱うことができる。
+ *
  * @callback ConvertFunction
  * @param {HTMLImageElement} image - アップロードされた元画像（リサイズ前）
  * @param {ConversionOptions} options - 変換オプション
- * @returns {PatternGrid} 生成された図案グリッド
+ * @returns {PatternGrid | Promise<PatternGrid>} 生成された図案グリッド（同期または非同期）
  */
 
 /**
@@ -88,6 +115,7 @@
  *
  * design.md のクラス図における `<<interface>> ConversionStrategy` に対応する。
  * `convert` を実装したオブジェクトはこの型を満たす（ダックタイピング）。
+ * 戻り値は同期（`PatternGrid`）でも非同期（`Promise<PatternGrid>`）でもよい。
  *
  * @typedef {Object} ConversionStrategy
  * @property {ConvertFunction} convert - 画像と変換オプションから図案グリッドを生成する
@@ -112,10 +140,14 @@ export class AbstractConversionStrategy {
   /**
    * 画像を図案グリッドへ変換する。
    *
+   * サブクラスは同期（`PatternGrid`）または非同期（`Promise<PatternGrid>`）で
+   * 戻り値を返すことができる。呼び出し側は `await Promise.resolve(strategy.convert(...))`
+   * で統一的に扱う。
+   *
    * @abstract
    * @param {HTMLImageElement} image - アップロードされた元画像（リサイズ前）
    * @param {ConversionOptions} options - 変換オプション
-   * @returns {PatternGrid} 生成された図案グリッド
+   * @returns {PatternGrid | Promise<PatternGrid>} 生成された図案グリッド（同期または非同期）
    * @throws {Error} サブクラスで `convert` が実装されていない場合
    */
   // eslint-disable-next-line no-unused-vars

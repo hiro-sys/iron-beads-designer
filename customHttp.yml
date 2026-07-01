@@ -1,0 +1,34 @@
+# AWS Amplify Hosting のカスタムHTTPヘッダー設定
+# -----------------------------------------------------------------------------
+# このファイルはリポジトリのルートに配置する（モノレポのため appRoot で対象アプリを指定）。
+# Amplify Console側で何も設定していなくても、このファイルがあれば初回デプロイから
+# 自動的にヘッダーが適用される（Console側の「Custom headers」設定より本ファイルが優先される）。
+#
+# 参考: https://docs.aws.amazon.com/amplify/latest/userguide/custom-headers.html
+#
+# Content-Security-Policy の各ディレクティブについて（このアプリの実装に基づく）:
+#   - style-src に 'unsafe-inline' が必要な理由: ビーズの色見本表示などで
+#     JavaScript から element.style.xxx を直接設定している箇所が多数あるため。
+#   - img-src に data: が必要な理由: アップロード画像を FileReader で
+#     データURL化してプレビュー表示するため。
+#   - connect-src に generativelanguage.googleapis.com が必要な理由:
+#     AIお題生成機能が Gemini API を直接 fetch するため（BYOK）。
+#     このエンドポイントを変更する場合は、ここも合わせて更新すること。
+#   - script-src は 'self' のみ（インラインスクリプト・eval は未使用のため unsafe-inline は不要）。
+applications:
+  - appRoot: bead-pattern-maker
+    customHeaders:
+      - pattern: '**/*'
+        headers:
+          - key: 'Strict-Transport-Security'
+            value: 'max-age=31536000; includeSubDomains'
+          - key: 'X-Frame-Options'
+            value: 'DENY'
+          - key: 'X-Content-Type-Options'
+            value: 'nosniff'
+          - key: 'Referrer-Policy'
+            value: 'strict-origin-when-cross-origin'
+          - key: 'Permissions-Policy'
+            value: 'camera=(), microphone=(), geolocation=()'
+          - key: 'Content-Security-Policy'
+            value: "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://generativelanguage.googleapis.com; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"

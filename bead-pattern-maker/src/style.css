@@ -638,6 +638,60 @@ button {
   color: var(--text);
 }
 
+/* ===== Gemini モデルセレクタ（model-selector__*） =====
+   変換方式パネル内で使用するAIモデルを選択する。既存の preprocess__* と
+   同様の見た目に揃える。 */
+
+.model-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.model-selector__label {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.model-selector__select {
+  padding: 7px 8px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+}
+
+/* ===== お題入力（ai-prompt-input__*） =====
+   画像不要のAIお題生成のためのお題テキスト入力。既存の model-selector__* /
+   preprocess__* と同様の見た目に揃える。 */
+
+.ai-prompt-input {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.ai-prompt-input__label {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.ai-prompt-input__field {
+  padding: 7px 8px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+}
+
+.ai-prompt-input__notice {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
 /* ===== 図案表示領域（常時視認・sticky / 要件13.1, 13.2） =====
    ズーム・エクスポート操作（.pattern-controls）、メッセージ、図案ビューポート
    （.pattern-viewport）をまとめたブロック。設定サイドバーを縦にスクロールしても、
@@ -830,4 +884,50 @@ button {
   color: #666;
   border-top: 1px solid #e0e0e0;
   margin-top: 24px;
+}
+
+/* ===== 入力方法トグル（input-mode-toggle__*） =====
+   「📷 画像から」「✨ AIお題から」を切り替えるトグル。既存のデザイントークンに揃える。 */
+
+.input-mode-toggle {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.input-mode-toggle__option {
+  flex: 1 1 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  cursor: pointer;
+  font-size: 13px;
+  user-select: none;
+  transition: background 0.1s, border-color 0.1s;
+}
+
+.input-mode-toggle__option:hover {
+  border-color: var(--text-muted);
+}
+
+/* 選択中のオプションを強調する（:has で radio:checked を持つラベルを選択） */
+.input-mode-toggle__option:has(.input-mode-toggle__radio:checked) {
+  background: rgba(46, 125, 50, 0.1);
+  border-color: var(--success);
+  font-weight: 600;
+}
+
+.input-mode-toggle__radio {
+  margin: 0;
+}
+
+/* ===== 入力グループ（画像モード / AIお題モードの切替表示） ===== */
+
+.input-group[hidden] {
+  display: none;
 }

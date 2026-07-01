@@ -137,6 +137,7 @@ export function createMockContext2D(canvas) {
 // オリジナル実装の退避（uninstall 時に復元するため）
 let originalGetContext = null;
 let originalToBlob = null;
+let originalToDataURL = null;
 
 /**
  * HTMLCanvasElement.prototype.getContext / toBlob をモックへ差し替える。
@@ -167,10 +168,19 @@ export function installCanvasMock() {
     // 実ブラウザの非同期挙動に近づけたい場合は queueMicrotask 等に置き換え可能
     callback(blob);
   };
+
+  // toDataURL モック（jsdom は toDataURL を実装していないため）
+  if (!originalToDataURL) {
+    originalToDataURL = HTMLCanvasElement.prototype.toDataURL;
+  }
+  HTMLCanvasElement.prototype.toDataURL = function (type = 'image/png') {
+    // テスト用のダミー base64 データを返す
+    return `data:${type};base64,dGVzdA==`;
+  };
 }
 
 /**
- * installCanvasMock で差し替えた getContext / toBlob を元に戻す。
+ * installCanvasMock で差し替えた getContext / toBlob / toDataURL を元に戻す。
  */
 export function uninstallCanvasMock() {
   if (typeof HTMLCanvasElement === 'undefined') return;
@@ -182,6 +192,10 @@ export function uninstallCanvasMock() {
   if (originalToBlob) {
     HTMLCanvasElement.prototype.toBlob = originalToBlob;
     originalToBlob = null;
+  }
+  if (originalToDataURL) {
+    HTMLCanvasElement.prototype.toDataURL = originalToDataURL;
+    originalToDataURL = null;
   }
 }
 

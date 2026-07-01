@@ -32,6 +32,7 @@ import './style.css';
 
 import { createAppState } from './state.js';
 import { localConversionStrategy } from './engine/LocalConversionStrategy.js';
+import { aiConversionStrategy } from './engine/AIConversionStrategy.js';
 import { renderPattern } from './renderer/canvasRenderer.js';
 import { exportAsPng } from './renderer/exporter.js';
 import { renderColorList, calculateUsedColors } from './ui/colorList.js';
@@ -43,8 +44,13 @@ import { initRecommendedSizesUI } from './ui/recommendedSizes.js';
 import { initPaletteSelectorUI } from './ui/paletteSelector.js';
 import { initBackgroundExclusionUI } from './ui/backgroundExclusion.js';
 import { initPatternEditorUI, canvasPointToCell } from './ui/patternEditor.js';
+import { initInputModeToggleUI } from './ui/inputModeToggle.js';
+import { initApiKeyManagerUI } from './ui/apiKeyManager.js';
+import { initModelSelectorUI } from './ui/modelSelector.js';
+import { initAiPromptInputUI } from './ui/aiPromptInput.js';
 
 import { BEAD_CONFIG } from './data/beadConfig.js';
+import { messageForAiError } from './utils/messageForAiError.js';
 
 // --- 定数 --------------------------------------------------------------------
 
@@ -65,6 +71,9 @@ const EXPORT_CELL_SIZE = 20;
 /** メッセージの自動消去時間（ミリ秒）。 */
 const MESSAGE_TIMEOUT_MS = 4000;
 
+/** お題テキスト生成のタイムアウト（ミリ秒）。thinking 有効で大きいグリッドは時間がかかるため長め（5分）に設定する。 */
+const AI_TEXT_TIMEOUT_MS = 300000;
+
 // --- DOM要素の取得 -----------------------------------------------------------
 
 const imageUploadContainer = document.querySelector('#image-upload-container');
@@ -76,6 +85,16 @@ const paletteSelectorContainer = document.querySelector('#palette-selector-conta
 const backgroundExclusionContainer = document.querySelector('#background-exclusion-container');
 const patternEditorToolsContainer = document.querySelector('#pattern-editor-tools-container');
 const colorListContainer = document.querySelector('#color-list-container');
+
+// --- 入力方法・AI生成関連の DOM 要素 -----------------------------------------
+const inputModeToggleContainer = document.querySelector('#input-mode-toggle-container');
+const imageInputGroup = document.querySelector('#image-input-group');
+const aiInputGroup = document.querySelector('#ai-input-group');
+const apiKeyContainer = document.querySelector('#api-key-container');
+const aiModelContainer = document.querySelector('#ai-model-container');
+const aiPromptContainer = document.querySelector('#ai-prompt-container');
+const aiTextConvertBtn = document.querySelector('#ai-text-convert-btn');
+const aiProcessingIndicator = document.querySelector('#ai-processing-indicator');
 
 const previewCanvas = document.querySelector('#preview-canvas');
 const patternCanvas = document.querySelector('#pattern-canvas');
@@ -102,6 +121,14 @@ let backgroundExclusionHandle;
 let patternEditorHandle;
 // eslint-disable-next-line no-unused-vars
 let imageUploadHandle;
+// eslint-disable-next-line no-unused-vars
+let inputModeToggleHandle;
+// eslint-disable-next-line no-unused-vars
+let apiKeyManagerHandle;
+// eslint-disable-next-line no-unused-vars
+let modelSelectorHandle;
+// eslint-disable-next-line no-unused-vars
+let aiPromptInputHandle;
 
 // =============================================================================
 // メッセージ表示（情報／エラー）
@@ -209,6 +236,186 @@ function generatePattern() {
 }
 
 // =============================================================================
+// AI生成の実行（applyInputModeVisibility / updateAiButtonState / showLocalFallbackAffordance）
+// -----------------------------------------------------------------------------
+// 入力方法（inputMode）に応じた入力グループの表示切替と、お題から生成ボタンの
+// 有効/無効制御を担う。
+// =============================================================================
+
+/**
+ * 入力方法（state.inputMode）に応じて入力グループの表示/非表示を切り替える。
+ *   - 'image'  : 画像入力グループ（#image-input-group）を表示し、AI入力グループを隠す
+ *   - 'prompt' : AIお題入力グループ（#ai-input-group）を表示し、画像入力グループを隠す
+ */
+function applyInputModeVisibility() {
+  const promptMode = state.inputMode === 'prompt';
+  if (imageInputGroup) imageInputGroup.hidden = promptMode;
+  if (aiInputGroup) aiInputGroup.hidden = !promptMode;
+}
+
+/**
+ * お題から生成ボタンの有効/無効状態を更新する。
+ *
+ * お題から生成ボタン（#ai-text-convert-btn）の有効条件（すべて満たす場合のみ有効・画像は不要）:
+ *   - 入力方法が 'prompt'（AIお題から）
+ *   - APIキーが設定済み（null でない）
+ *   - お題（state.aiPrompt）が trim 後1文字以上
+ *   - 有効パレットが1色以上（paletteSelectorHandle.canGenerate()）
+ *   - AI処理中でない
+ *
+ * @returns {void}
+ */
+function updateAiButtonState() {
+  const promptMode = state.inputMode === 'prompt';
+  const hasKey = state.geminiApiKey !== null;
+  const canUsePalette = Boolean(paletteSelectorHandle && paletteSelectorHandle.canGenerate());
+  const notProcessing = !state.aiProcessing;
+
+  // お題から生成ボタン: 画像は不要。お題が trim 後1文字以上であること。
+  if (aiTextConvertBtn) {
+    const hasPrompt =
+      typeof state.aiPrompt === 'string' && state.aiPrompt.trim().length > 0;
+    const canExecuteText =
+      promptMode &&
+      hasKey &&
+      hasPrompt &&
+      canUsePalette &&
+      notProcessing;
+    aiTextConvertBtn.disabled = !canExecuteText;
+  }
+
+  // 処理中インジケータの表示制御
+  if (aiProcessingIndicator) {
+    aiProcessingIndicator.hidden = !state.aiProcessing;
+  }
+}
+
+/**
+ * 画像アップロードへの切り替え導線を表示する。
+ *
+ * AIお題生成が失敗した際に、「画像アップロードに切り替える」ボタンを含むメッセージを
+ * 表示し、押下で入力方法を画像に切り替えて（画像があれば）ローカル変換で生成する。
+ */
+function showLocalFallbackAffordance() {
+  if (!messageEl) return;
+
+  // 既存のタイムアウトを消す
+  if (messageTimerId !== null) {
+    clearTimeout(messageTimerId);
+    messageTimerId = null;
+  }
+
+  messageEl.textContent = '';
+  messageEl.className = 'pattern-message pattern-message--error is-visible';
+
+  const textSpan = document.createElement('span');
+  textSpan.textContent = 'AI生成に失敗しました。';
+
+  const fallbackBtn = document.createElement('button');
+  fallbackBtn.type = 'button';
+  fallbackBtn.className = 'btn btn--link';
+  fallbackBtn.textContent = '画像アップロードに切り替える';
+  fallbackBtn.addEventListener('click', () => {
+    // 画像入力モードに切り替えてUIを同期し、画像があればローカル変換で生成する。
+    state.setInputMode('image');
+    if (inputModeToggleHandle) inputModeToggleHandle.refresh();
+    applyInputModeVisibility();
+    updateAiButtonState();
+    generatePattern();
+  });
+
+  messageEl.appendChild(textSpan);
+  messageEl.appendChild(document.createTextNode(' '));
+  messageEl.appendChild(fallbackBtn);
+}
+
+/**
+ * お題テキストから図案ドット絵を生成する非同期関数。
+ *
+ * 画像アップロード不要で、ユーザーが入力したお題（state.aiPrompt）から AIが
+ * ドット絵を生成する。AIの得意分野（テキストからの創造的生成）を活かす機能。
+ *
+ * フロー:
+ *   1. ガード条件（キー設定済 / お題が trim 後1文字以上 / 有効色>0 / 処理中でない）。画像は不要。
+ *   2. setAiProcessing(true) → UI更新
+ *   3. aiConversionStrategy.generateFromText(state.aiPrompt, aiOptions) を実行
+ *   4. 成功で state.setPattern / setLastAiPattern（描画は購読リスナーが実行）
+ *   5. 失敗時は直近図案を保持し、フォールバック導線を提示
+ *   6. finally で setAiProcessing(false) → UI更新
+ *
+ * お題生成では画像を送らないため、画像送信に関する同意ステップは不要。
+ */
+async function runAiTextConversion() {
+  // --- ガード条件（画像は不要） ---
+  if (state.geminiApiKey === null) return;
+  const subject = typeof state.aiPrompt === 'string' ? state.aiPrompt.trim() : '';
+  if (subject.length === 0) return;
+  if (!paletteSelectorHandle || !paletteSelectorHandle.canGenerate()) return;
+  if (state.aiProcessing) return;
+
+  // お題生成では画像を送らないため、画像送信に関する同意ステップは介在させない。
+
+  // --- 処理中状態の設定（要件8.3） ---
+  state.setAiProcessing(true);
+  updateAiButtonState();
+
+  // --- オプション構築 ---
+  const activePalette = paletteSelectorHandle.getActivePalette();
+  const { cols, rows } = state.plateConfig;
+  const pegCount = (BEAD_CONFIG[state.beadType] || BEAD_CONFIG.perler).pegCount;
+  const width = cols * pegCount;
+  const height = rows * pegCount;
+
+  const aiOptions = {
+    width,
+    height,
+    activePalette,
+    maxColors: state.maxColors,
+    beadType: state.beadType,
+    plateConfig: { cols, rows },
+    apiKey: state.geminiApiKey,
+    model: state.geminiModel,
+    // お題生成は thinking 有効（精度重視）で大きいグリッドは時間がかかるため、
+    // タイムアウトを長め（5分）に設定する（geminiClient の既定60秒より延長する）。
+    timeoutMs: AI_TEXT_TIMEOUT_MS,
+    // ローカル開発時（vite dev）のみ AI応答グリッドの統計デバッグログを出す。
+    // 本番ビルドでは import.meta.env.DEV が false のため何も出力されない（要件5.8維持）。
+    debug: import.meta.env?.DEV,
+  };
+
+  try {
+    // お題（state.aiPrompt）を渡す。検証（trim 後1文字以上）は generateFromText 側でも行う。
+    const result = await aiConversionStrategy.generateFromText(state.aiPrompt, aiOptions);
+    // 成功: 図案を反映（描画は state.subscribe の renderView が担う）。
+    clearMessage();
+    state.setPattern(result);
+    state.setLastAiPattern(result);
+  } catch (error) {
+    // 失敗: 直近図案を保持し、フォールバック導線を表示する。
+    // セキュリティ: 生レスポンス・API キーをログ出力しない（要件5.8 / Property 8）。
+    if (import.meta.env?.DEV) {
+      // ローカル開発時のみ: 原因特定用の詳細ログを出力する（API キーは含めない）。
+      console.error('[AIお題生成 失敗・詳細]', {
+        name: error?.name,
+        type: error?.type,
+        status: error?.status,
+        message: error?.message,
+        detail: error?.detail,
+      });
+    } else {
+      // 本番ビルド: エラー種別のみ（生レスポンス・API キーを出さない）。
+      console.error('AIお題生成に失敗しました:', error?.type || 'unknown');
+    }
+    showMessage(messageForAiError(error), 'error');
+    showLocalFallbackAffordance();
+  } finally {
+    // 処理中状態を解除（要件8.4）
+    state.setAiProcessing(false);
+    updateAiButtonState();
+  }
+}
+
+// =============================================================================
 // 描画（renderView） — state.subscribe に登録する唯一のリスナー
 // -----------------------------------------------------------------------------
 // state が変化するたびに呼ばれ、現在の state.pattern を Canvas に描画し、
@@ -248,6 +455,9 @@ function renderView() {
 
     if (exportBtn) exportBtn.disabled = true;
   }
+
+  // お題から生成ボタンの有効/無効を同期する。
+  updateAiButtonState();
 }
 
 // =============================================================================
@@ -383,7 +593,8 @@ function initPreprocessUI(container) {
       (value) => {
         state.setResizeMethod(value);
         // 要件10.8: 変更時に図案を再生成する。
-        if (state.uploadedImage) {
+        // AIお題生成中は自動再実行しない。画像入力モード時のみ再生成する。
+        if (state.uploadedImage && state.inputMode === 'image') {
           generatePattern();
         }
       },
@@ -404,7 +615,8 @@ function initPreprocessUI(container) {
       (value) => {
         state.setFitMode(value);
         // 要件10.8: 変更時に図案を再生成する。
-        if (state.uploadedImage) {
+        // AIお題生成中は自動再実行しない。画像入力モード時のみ再生成する。
+        if (state.uploadedImage && state.inputMode === 'image') {
           generatePattern();
         }
       },
@@ -460,7 +672,10 @@ beadTypeHandle = initBeadTypeSelectorUI(beadTypeContainer, state, {
     if (plateConfigHandle) plateConfigHandle.syncFromState();
 
     if (state.uploadedImage) {
-      generatePattern();
+      // AIお題生成中は自動再実行しない。画像入力モード時のみ再生成する。
+      if (state.inputMode === 'image') {
+        generatePattern();
+      }
     } else {
       renderView();
     }
@@ -474,7 +689,10 @@ plateConfigHandle = initPlateConfigUI(plateConfigContainer, state, {
     // 新サイズで再生成して上書きする。無ければ空グリッド/未生成を再描画する。
     if (recommendedSizesHandle) recommendedSizesHandle.refresh();
     if (state.uploadedImage) {
-      generatePattern();
+      // AIお題生成中は自動再実行しない。画像入力モード時のみ再生成する。
+      if (state.inputMode === 'image') {
+        generatePattern();
+      }
     } else {
       renderView();
     }
@@ -487,7 +705,10 @@ recommendedSizesHandle = initRecommendedSizesUI(recommendedSizesContainer, state
     // 選択された構成を入力欄に同期し、画像があれば図案を再生成する（要件8.3）。
     if (plateConfigHandle) plateConfigHandle.syncFromState();
     if (state.uploadedImage) {
-      generatePattern();
+      // AIお題生成中は自動再実行しない。画像入力モード時のみ再生成する。
+      if (state.inputMode === 'image') {
+        generatePattern();
+      }
     }
   },
 });
@@ -501,7 +722,10 @@ paletteSelectorHandle = initPaletteSelectorUI(paletteSelectorContainer, state, {
     // 編集ツールの色候補も変わるため patternEditor を再同期する。
     if (patternEditorHandle) patternEditorHandle.refresh();
     if (state.uploadedImage) {
-      generatePattern();
+      // AIお題生成中は自動再実行しない。画像入力モード時のみ再生成する。
+      if (state.inputMode === 'image') {
+        generatePattern();
+      }
     }
   },
 });
@@ -511,7 +735,10 @@ backgroundExclusionHandle = initBackgroundExclusionUI(backgroundExclusionContain
   onSettingsChange: () => {
     // 要件9.9: 背景除外のON/OFF・閾値・手動色選択の変更時に図案を再生成する。
     if (state.uploadedImage) {
-      generatePattern();
+      // AIお題生成中は自動再実行しない。画像入力モード時のみ再生成する。
+      if (state.inputMode === 'image') {
+        generatePattern();
+      }
     }
   },
 });
@@ -542,13 +769,53 @@ imageUploadHandle = initImageUploadUI(imageUploadContainer, {
     drawPreviewCanvas(image);
     // 画像解像度に基づくおすすめサイズを更新する（要件8.1）。
     if (recommendedSizesHandle) recommendedSizesHandle.refresh();
-    // 図案を生成する（要件4.4）。
-    generatePattern();
+    // AIお題生成中は自動再実行しない。画像入力モード時のみ再生成する。
+    if (state.inputMode === 'image') {
+      generatePattern();
+    }
+    // お題から生成ボタンの状態を同期する（画像有無では変化しないが念のため）。
+    updateAiButtonState();
   },
 });
 
 // --- 4. リサイズ方式・フィットモードの選択UI ----------------------------------
 initPreprocessUI(preprocessContainer);
+
+// --- 入力方法・AI生成関連UIの初期化と結線 -------------------------------------
+// 入力方法トグル（📷 画像から / ✨ AIお題から）
+inputModeToggleHandle = initInputModeToggleUI(inputModeToggleContainer, state, {
+  onModeChange: () => {
+    // 入力グループの表示切替と実行ボタンの有効/無効を更新する（図案生成は自動実行しない）。
+    applyInputModeVisibility();
+    updateAiButtonState();
+  },
+});
+
+// APIキー設定UI（要件3.1〜3.9）
+apiKeyManagerHandle = initApiKeyManagerUI(apiKeyContainer, state, {
+  onKeyChange: () => {
+    updateAiButtonState();
+  },
+});
+
+// Gemini モデルセレクタ（タイムアウト対策・モデル切り替え）
+modelSelectorHandle = initModelSelectorUI(aiModelContainer, state, {
+  onModelChange: () => {
+    updateAiButtonState();
+  },
+});
+
+// お題入力UI（画像不要のAIお題生成・onPromptChange で実行ボタンの有効/無効を更新）
+aiPromptInputHandle = initAiPromptInputUI(aiPromptContainer, state, {
+  onPromptChange: () => {
+    updateAiButtonState();
+  },
+});
+
+// お題から生成ボタンのクリック結線
+if (aiTextConvertBtn) {
+  aiTextConvertBtn.addEventListener('click', runAiTextConversion);
+}
 
 // =============================================================================
 // グローバルなイベント結線（ズーム・エクスポート・ツールチップ・背景色ピック）
@@ -632,6 +899,9 @@ if (exportBtn) {
 // state の変更を購読し、描画専用リスナー（renderView）で Canvas・使用色一覧を更新する。
 // renderView は state を変更しないため、通知の再帰ループは発生しない。
 state.subscribe(renderView);
+
+// 初期表示: 入力方法（inputMode）に応じた入力グループの表示を同期する。
+applyInputModeVisibility();
 
 // 初期表示（図案未生成メッセージ・ズーム率など）。
 renderView();

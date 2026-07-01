@@ -19,11 +19,30 @@
         <!-- ===== 設定サイドバー ===== -->
         <aside class="app__sidebar">
           <section class="panel">
-            <h2 class="panel__title">1. 画像をアップロード</h2>
-            <div id="image-upload-container"></div>
-            <!-- 背景色の手動選択（クリック）用プレビュー。生ピクセル色の取得に使う -->
-            <div class="preview-canvas__wrap">
-              <canvas id="preview-canvas" class="preview-canvas" hidden></canvas>
+            <h2 class="panel__title">1. 入力方法</h2>
+            <div id="input-mode-toggle-container"></div>
+
+            <!-- 画像モード: 画像アップロード＋背景色ピック用プレビュー -->
+            <div id="image-input-group" class="input-group">
+              <div id="image-upload-container"></div>
+              <!-- 背景色の手動選択（クリック）用プレビュー。生ピクセル色の取得に使う -->
+              <div class="preview-canvas__wrap">
+                <canvas id="preview-canvas" class="preview-canvas" hidden></canvas>
+              </div>
+            </div>
+
+            <!-- AIお題モード: APIキー・モデル・お題入力・生成ボタン -->
+            <div id="ai-input-group" class="input-group" hidden>
+              <div id="api-key-container"></div>
+              <div id="ai-model-container"></div>
+              <div id="ai-prompt-container"></div>
+              <div class="ai-execution">
+                <button id="ai-text-convert-btn" type="button" class="btn btn--primary" disabled>お題から生成</button>
+                <div id="ai-processing-indicator" class="ai-processing-indicator" hidden>
+                  <span class="ai-processing-indicator__spinner"></span>
+                  <span class="ai-processing-indicator__text">AI生成中...</span>
+                </div>
+              </div>
             </div>
           </section>
 
