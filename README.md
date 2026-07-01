@@ -2,12 +2,15 @@
 
 **English** | [日本語](./README.ja.md)
 
-A web application that automatically generates Perler Beads / Nano Beads patterns from an uploaded image. All processing—image conversion, pattern generation, and export—runs entirely in the browser.
+A web application that automatically generates Perler Beads / Nano Beads patterns — either from an uploaded image, or from a text prompt using Google Gemini AI. All processing runs entirely in the browser (the optional AI prompt mode sends only your prompt text to the Gemini API).
 
 ## Features
 
+- Two input modes, switchable at any time: generate a pattern from an **uploaded image** or from an **AI prompt** (text only)
 - Image upload (JPEG / PNG / GIF / WebP, up to 10 MB, drag & drop supported)
 - Automatic conversion to Perler Beads (100 colors) / Nano Beads (55 colors) using nearest-color matching based on CIE76 color difference
+- AI prompt generation powered by Google Gemini (BYOK): enter your own Google AI Studio API key, choose a Gemini model (grouped by free-tier availability), type a prompt (e.g. "cat", "heart", "star"), and Gemini generates the pixel-art pattern directly — no image upload needed. Only the prompt text is sent to the Gemini API
+- API keys are kept in memory for the current session only; they are never persisted (no localStorage / sessionStorage / cookies) and are cleared on reload
 - Plate configuration (1×1 to 10×10) with recommended size suggestions
 - Background removal, color-count limiting / reduction, and selectable resize method / fit mode
 - Manual pattern editing (with drag-to-paint continuous editing)
@@ -18,6 +21,7 @@ A web application that automatically generates Perler Beads / Nano Beads pattern
 - Vanilla JavaScript (ES modules)
 - Vite (build tool)
 - HTML5 Canvas API
+- Google Gemini API (optional AI prompt generation, BYOK — no backend involved)
 - Vitest + fast-check (testing)
 
 ## Directory Structure
@@ -44,6 +48,10 @@ npm test         # Run tests
 ## Deployment
 
 Hosted on AWS Amplify Hosting. The `amplify.yml` at the repository root defines the build settings for this monorepo structure (`appRoot: bead-pattern-maker`).
+
+### Security headers
+
+The `customHttp.yml` file at the repository root defines HTTP security headers (Content-Security-Policy, HSTS, X-Frame-Options, etc.) that AWS Amplify Hosting applies automatically on every deployment, including the very first one — no manual console configuration is required. If you fork this project and change the Gemini API endpoint or add other external resources, update the `connect-src` directive in the `Content-Security-Policy` header accordingly.
 
 ## License
 
