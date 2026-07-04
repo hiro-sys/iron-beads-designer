@@ -45,6 +45,51 @@ import { initBackgroundExclusionUI } from './ui/backgroundExclusion.js';
 import { initPatternEditorUI, canvasPointToCell } from './ui/patternEditor.js';
 
 import { BEAD_CONFIG } from './data/beadConfig.js';
+import { t, getColorName, getLocale } from './i18n.js';
+
+// --- ロケール反映（<html lang> とタイトルをロケールに合わせる） -------------
+document.documentElement.lang = getLocale();
+document.title = t('app.docTitle');
+
+/**
+ * index.html に静的に書かれた（ビルド時点では日本語固定の）見出し・ラベル・
+ * aria 属性を、現在ロケールの翻訳文字列に差し替える。
+ * 各要素は id で一意に取得できるよう index.html 側にあらかじめ付与している。
+ * 要素が存在しない（テスト環境等でDOM構造が異なる）場合は安全に無視する。
+ */
+function applyStaticTranslations() {
+  const setText = (id, key) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.textContent = t(key);
+    }
+  };
+  const setAriaLabel = (id, key) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.setAttribute('aria-label', t(key));
+    }
+  };
+
+  setText('app-title', 'app.title');
+  setText('app-subtitle', 'app.subtitle');
+  setText('panel-title-upload', 'panel.upload');
+  setText('panel-title-bead-type', 'panel.beadType');
+  setText('panel-title-plate-config', 'panel.plateConfig');
+  setText('panel-title-preprocess', 'panel.preprocess');
+  setText('panel-title-palette-selector', 'panel.paletteSelector');
+  setText('panel-title-background-exclusion', 'panel.backgroundExclusion');
+  setText('panel-title-pattern-editor', 'panel.patternEditor');
+  setText('panel-title-color-list', 'panel.colorList');
+  setText('export-btn', 'export.button');
+  setText('pattern-empty-message', 'pattern.emptyMessage');
+  setText('footer-text', 'app.footer');
+  setAriaLabel('zoom-group', 'zoom.group');
+  setAriaLabel('zoom-out-btn', 'zoom.out');
+  setAriaLabel('zoom-in-btn', 'zoom.in');
+}
+
+applyStaticTranslations();
 
 // --- 定数 --------------------------------------------------------------------
 
@@ -174,7 +219,7 @@ function generatePattern() {
 
   // 要件11.5: 有効な色が1色も無い場合は生成しない（paletteSelector がメッセージ表示）。
   if (!paletteSelectorHandle || !paletteSelectorHandle.canGenerate()) {
-    showMessage('最低1色を有効にしてください。', 'error');
+    showMessage(t('main.noActiveColor'), 'error');
     return;
   }
 
@@ -204,7 +249,7 @@ function generatePattern() {
     // 要件4.8: 生成失敗時はエラーメッセージを表示し、前回図案（state.pattern）を保持する。
     // state.pattern を変更しないため、直前の図案は画面に残る。
     console.error('図案の生成に失敗しました:', error);
-    showMessage('図案の生成に失敗しました。設定を確認してください。', 'error');
+    showMessage(t('main.generateError'), 'error');
   }
 }
 
@@ -313,7 +358,7 @@ function handleCanvasMouseMove(event) {
     return;
   }
 
-  showTooltip(event.clientX, event.clientY, bead.name);
+  showTooltip(event.clientX, event.clientY, getColorName(bead));
 }
 
 // =============================================================================
@@ -374,10 +419,10 @@ function initPreprocessUI(container) {
   root.appendChild(
     buildSelectField(
       'resize-method-select',
-      'リサイズ方式',
+      t('main.resizeMethodLabel'),
       [
-        { value: 'smooth', label: 'なめらか（平均化）' },
-        { value: 'sharp', label: 'くっきり（最近傍）' },
+        { value: 'smooth', label: t('main.resizeSmooth') },
+        { value: 'sharp', label: t('main.resizeSharp') },
       ],
       state.resizeMethod,
       (value) => {
@@ -394,11 +439,11 @@ function initPreprocessUI(container) {
   root.appendChild(
     buildSelectField(
       'fit-mode-select',
-      'フィットモード',
+      t('main.fitModeLabel'),
       [
-        { value: 'stretch', label: '伸縮' },
-        { value: 'contain', label: 'フィット（余白を未配置）' },
-        { value: 'cover', label: 'クロップ' },
+        { value: 'stretch', label: t('main.fitStretch') },
+        { value: 'contain', label: t('main.fitContain') },
+        { value: 'cover', label: t('main.fitCover') },
       ],
       state.fitMode,
       (value) => {
@@ -604,7 +649,7 @@ if (exportBtn) {
   exportBtn.addEventListener('click', async () => {
     const pattern = state.pattern;
     if (!pattern) {
-      showMessage('図案がまだ生成されていません。', 'error');
+      showMessage(t('main.noPatternError'), 'error');
       return;
     }
 
@@ -617,7 +662,7 @@ if (exportBtn) {
       showMessage(result.message, result.success ? 'info' : 'error');
     } catch (error) {
       console.error('エクスポート中にエラーが発生しました:', error);
-      showMessage('エクスポートに失敗しました。', 'error');
+      showMessage(t('main.exportError'), 'error');
     } finally {
       // 図案がある限り再度エクスポート可能にする。
       exportBtn.disabled = state.pattern == null;

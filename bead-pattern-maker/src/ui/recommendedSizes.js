@@ -15,6 +15,7 @@
 // =============================================================================
 
 import { BEAD_CONFIG } from '../data/beadConfig.js';
+import { t } from '../i18n.js';
 
 /**
  * @typedef {Object} RecommendedSize
@@ -142,19 +143,6 @@ export function calculateRecommendedSizes(imageWidth, imageHeight, pegCount) {
 // =============================================================================
 
 /**
- * 画像が未アップロードのときに表示する案内文（要件8.1）。
- * @type {string}
- */
-const NO_IMAGE_MESSAGE = '画像をアップロードすると、おすすめのプレート構成が表示されます。';
-
-/**
- * 画像はあるが推奨を算出できなかったときの案内文。
- * （解像度が取得できない等の異常時。クラッシュさせず、空表示の代わりに表示する）
- * @type {string}
- */
-const NO_RESULT_MESSAGE = 'おすすめサイズを計算できませんでした。';
-
-/**
  * 縮小率（scaleRatio: 0-1）をパーセント文字列に整形する（要件8.2）。
  * 端数は小数1桁に丸め、不要な末尾の .0 は省く（例: 0.452 → "45.2%"、1 → "100%"）。
  *
@@ -165,6 +153,11 @@ function formatScaleRatioPercent(scaleRatio) {
   const percent = Number((scaleRatio * 100).toFixed(1));
   return `${percent}%`;
 }
+
+/** 画像が未アップロードのときに表示する案内文（要件8.1）。 */
+const NO_IMAGE_MESSAGE_KEY = 'recommendedSizes.noImage';
+/** 画像はあるが推奨を算出できなかったときの案内文。 */
+const NO_RESULT_MESSAGE_KEY = 'recommendedSizes.noResult';
 
 /**
  * state.uploadedImage から画像の実寸（naturalWidth/Height）を取得する。
@@ -231,12 +224,16 @@ function buildSizeItem(size, isSelected, onClick) {
   // 総ビーズ数（要件8.2）。桁区切りで読みやすくする。
   const beads = document.createElement('span');
   beads.className = 'recommended-sizes__beads';
-  beads.textContent = `総ビーズ数: ${size.totalBeads.toLocaleString()}個`;
+  beads.textContent = t('recommendedSizes.totalBeads', {
+    count: size.totalBeads.toLocaleString(),
+  });
 
   // 画像の縮小率（要件8.2）。
   const scale = document.createElement('span');
   scale.className = 'recommended-sizes__scale';
-  scale.textContent = `縮小率: ${formatScaleRatioPercent(size.scaleRatio)}`;
+  scale.textContent = t('recommendedSizes.scale', {
+    percent: formatScaleRatioPercent(size.scaleRatio),
+  });
 
   button.appendChild(config);
   button.appendChild(beads);
@@ -313,14 +310,14 @@ export function initRecommendedSizesUI(container, state, options = {}) {
 
     const heading = document.createElement('div');
     heading.className = 'recommended-sizes__heading';
-    heading.textContent = 'おすすめサイズ';
+    heading.textContent = t('recommendedSizes.heading');
     root.appendChild(heading);
 
     const { width, height } = readImageSize(state.uploadedImage);
 
     // 画像が無い（実寸が取得できない）場合は案内のみ表示する（要件8.1）。
     if (width <= 0 || height <= 0) {
-      root.appendChild(buildMessage(NO_IMAGE_MESSAGE));
+      root.appendChild(buildMessage(t(NO_IMAGE_MESSAGE_KEY)));
       container.appendChild(root);
       return;
     }
@@ -332,7 +329,7 @@ export function initRecommendedSizesUI(container, state, options = {}) {
 
     // 推奨が0件（不正な実寸等）の場合は計算不可メッセージを表示する。
     if (sizes.length === 0) {
-      root.appendChild(buildMessage(NO_RESULT_MESSAGE));
+      root.appendChild(buildMessage(t(NO_RESULT_MESSAGE_KEY)));
       container.appendChild(root);
       return;
     }

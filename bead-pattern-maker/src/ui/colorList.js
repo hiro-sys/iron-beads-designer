@@ -39,6 +39,8 @@
  * @property {number} count - 図案内での使用個数
  */
 
+import { t, getColorName } from '../i18n.js';
+
 /**
  * @typedef {Object} UsedColorsResult
  * @property {UsedColorEntry[]} colors - 使用色エントリ（個数降順 → 色名昇順でソート済み）
@@ -91,6 +93,7 @@ export function calculateUsedColors(pattern) {
         colorMap.set(key, {
           id: cell.id,
           name: cell.name,
+          nameEn: cell.nameEn,
           r: cell.r,
           g: cell.g,
           b: cell.b,
@@ -149,7 +152,7 @@ export function renderColorList(container, pattern) {
   // --- 合計個数（要件6.4） -------------------------------------------------
   const summary = document.createElement('div');
   summary.className = 'color-list__summary';
-  summary.textContent = `合計: ${totalBeads}個`;
+  summary.textContent = t('colorList.summary', { count: totalBeads });
   root.appendChild(summary);
 
   // --- 使用色リスト（要件6.1, 6.2, 6.3） -----------------------------------
@@ -174,12 +177,12 @@ export function renderColorList(container, pattern) {
     // 色名（要件6.2）
     const name = document.createElement('span');
     name.className = 'color-list__name';
-    name.textContent = color.name;
+    name.textContent = getColorName(color);
 
     // 使用個数（要件6.2）
     const count = document.createElement('span');
     count.className = 'color-list__count';
-    count.textContent = `${color.count}個`;
+    count.textContent = t('colorList.count', { count: color.count });
 
     item.appendChild(swatch);
     item.appendChild(name);
@@ -195,7 +198,7 @@ export function renderColorList(container, pattern) {
     const percent = ((excludedCount / totalCells) * 100).toFixed(1);
     const unplaced = document.createElement('div');
     unplaced.className = 'color-list__unplaced';
-    unplaced.textContent = `未配置: ${excludedCount}個 (${percent}%)`;
+    unplaced.textContent = t('colorList.unplaced', { excluded: excludedCount, percent });
     root.appendChild(unplaced);
   }
 

@@ -31,6 +31,7 @@
 
 import { calculateUsedColors } from '../ui/colorList.js';
 import { renderPattern } from './canvasRenderer.js';
+import { t, getColorName } from '../i18n.js';
 
 /** @typedef {import('../engine/ConversionStrategy.js').PatternGrid} PatternGrid */
 /** @typedef {import('../engine/ConversionStrategy.js').BeadColor} BeadColor */
@@ -206,7 +207,7 @@ function drawColorList(ctx, colors, totalBeads, startY, canvasWidth) {
   ctx.font = TITLE_FONT;
   ctx.textAlign = 'left';
   ctx.textBaseline = 'top';
-  ctx.fillText(`使用色一覧（合計: ${totalBeads}個）`, x, y);
+  ctx.fillText(t('exporter.listTitle', { count: totalBeads }), x, y);
   y += LIST_TITLE_HEIGHT;
 
   // 各色: 色見本（矩形）・色名・使用個数（要件7.3 / 6.2）
@@ -223,7 +224,7 @@ function drawColorList(ctx, colors, totalBeads, startY, canvasWidth) {
     ctx.fillStyle = LIST_TEXT_COLOR;
     ctx.textBaseline = 'middle';
     ctx.fillText(
-      `${color.name}  ${color.count}個`,
+      t('exporter.entry', { name: getColorName(color), count: color.count }),
       x + LIST_SWATCH_SIZE + LIST_SWATCH_GAP,
       y + LIST_SWATCH_SIZE / 2,
     );
@@ -351,7 +352,7 @@ export function exportAsPng(pattern, usedColors = null, options = {}) {
     return Promise.resolve({
       success: false,
       exported: false,
-      message: 'ビーズが1つも配置されていないため、エクスポートできません。',
+      message: t('exporter.noBeadsMessage'),
     });
   }
 
@@ -368,8 +369,8 @@ export function exportAsPng(pattern, usedColors = null, options = {}) {
             resolve({
               success: false,
               exported: false,
-              message: 'エクスポートに失敗しました。画像の生成に失敗しました。',
-              error: new Error('canvas.toBlob() が null を返しました。'),
+              message: t('exporter.failImage'),
+              error: new Error('canvas.toBlob() returned null.'),
             });
             return;
           }
@@ -378,14 +379,14 @@ export function exportAsPng(pattern, usedColors = null, options = {}) {
             resolve({
               success: true,
               exported: true,
-              message: 'PNG画像をエクスポートしました。',
+              message: t('exporter.success'),
             });
           } catch (downloadError) {
             // ダウンロード処理中の失敗（要件7.5。pattern は未変更で保持）
             resolve({
               success: false,
               exported: false,
-              message: 'エクスポートに失敗しました。ファイルの保存に失敗しました。',
+              message: t('exporter.failSave'),
               error: downloadError,
             });
           }
@@ -394,7 +395,7 @@ export function exportAsPng(pattern, usedColors = null, options = {}) {
         resolve({
           success: false,
           exported: false,
-          message: 'エクスポートに失敗しました。画像の生成に失敗しました。',
+          message: t('exporter.failImage'),
           error: blobError,
         });
       }
@@ -404,7 +405,7 @@ export function exportAsPng(pattern, usedColors = null, options = {}) {
     return Promise.resolve({
       success: false,
       exported: false,
-      message: 'エクスポートに失敗しました。',
+      message: t('exporter.failGeneric'),
       error,
     });
   }

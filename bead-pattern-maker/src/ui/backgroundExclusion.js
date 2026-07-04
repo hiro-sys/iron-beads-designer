@@ -34,6 +34,7 @@
 // =============================================================================
 
 import { detectBackgroundColor } from '../engine/backgroundDetector.js';
+import { t } from '../i18n.js';
 
 /** @typedef {{ r: number, g: number, b: number }} RgbColor */
 
@@ -295,7 +296,7 @@ export function initBackgroundExclusionUI(container, state, options = {}) {
   const toggleLabel = document.createElement('label');
   toggleLabel.className = 'background-exclusion__toggle-label';
   toggleLabel.setAttribute('for', toggleId);
-  toggleLabel.textContent = '背景除外';
+  toggleLabel.textContent = t('backgroundExclusion.toggleLabel');
 
   const toggleInput = document.createElement('input');
   toggleInput.type = 'checkbox';
@@ -316,7 +317,7 @@ export function initBackgroundExclusionUI(container, state, options = {}) {
 
   const colorLabel = document.createElement('span');
   colorLabel.className = 'background-exclusion__color-label';
-  colorLabel.textContent = '背景色:';
+  colorLabel.textContent = t('backgroundExclusion.colorLabel');
 
   // カラースウォッチ（背景色は動的設定。CSS未整備でも見えるよう最小スタイルを付与）。
   const swatch = document.createElement('span');
@@ -339,7 +340,7 @@ export function initBackgroundExclusionUI(container, state, options = {}) {
   // 手動選択のヒント（画像プレビューのクリックで背景色を変更できる・要件9.2）。
   const hint = document.createElement('p');
   hint.className = 'background-exclusion__hint';
-  hint.textContent = '画像プレビューをクリックすると、その位置の色で背景色を変更できます。';
+  hint.textContent = t('backgroundExclusion.hint');
   details.appendChild(hint);
 
   // --- ΔE閾値スライダー（要件9.4） ----------------------------------------
@@ -349,7 +350,7 @@ export function initBackgroundExclusionUI(container, state, options = {}) {
   const thresholdLabel = document.createElement('label');
   thresholdLabel.className = 'background-exclusion__threshold-label';
   thresholdLabel.setAttribute('for', thresholdId);
-  thresholdLabel.textContent = 'ΔE閾値:';
+  thresholdLabel.textContent = t('backgroundExclusion.thresholdLabel');
 
   const thresholdInput = document.createElement('input');
   thresholdInput.type = 'range';
@@ -387,13 +388,15 @@ export function initBackgroundExclusionUI(container, state, options = {}) {
       const { r, g, b } = bg.color;
       swatch.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
       swatch.style.visibility = 'visible';
-      const source = bg.autoDetected ? '自動検出' : '手動選択';
-      swatchText.textContent = `${source}: rgb(${r}, ${g}, ${b})`;
+      const source = bg.autoDetected
+        ? t('backgroundExclusion.autoDetected')
+        : t('backgroundExclusion.manual');
+      swatchText.textContent = t('backgroundExclusion.swatchSource', { source, r, g, b });
     } else {
       // 背景色が未検出のとき（画像なし・検出失敗）は手動選択を促す（design エラー方針）。
       swatch.style.backgroundColor = 'transparent';
       swatch.style.visibility = 'hidden';
-      swatchText.textContent = '背景色が未検出です。画像をクリックして選択してください。';
+      swatchText.textContent = t('backgroundExclusion.noColor');
     }
   }
 
@@ -404,9 +407,12 @@ export function initBackgroundExclusionUI(container, state, options = {}) {
   function updateExcludedCount() {
     const { excluded, total, percent } = countExcludedCells(state.pattern);
     if (total === 0) {
-      excludedCount.textContent = '除外セル: -';
+      excludedCount.textContent = t('backgroundExclusion.excludedCountEmpty');
     } else {
-      excludedCount.textContent = `除外セル: ${excluded}個 (${percent.toFixed(1)}%)`;
+      excludedCount.textContent = t('backgroundExclusion.excludedCount', {
+        excluded,
+        percent: percent.toFixed(1),
+      });
     }
   }
 
