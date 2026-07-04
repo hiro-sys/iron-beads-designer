@@ -11,6 +11,8 @@
 // Requirements: 3.1, 3.2, 3.3, 3.4, 3.6, 3.8, 3.9, 4.1, 4.2, 5.5, 5.6, 5.7, 8.6
 // =============================================================================
 
+import { t } from '../i18n.js';
+
 /**
  * APIキー設定UIを初期化してコンテナに描画する。
  *
@@ -52,7 +54,7 @@ export function initApiKeyManagerUI(container, state, options = {}) {
     const input = document.createElement('input');
     input.type = 'password'; // 初期マスク（要件3.2）
     input.className = 'api-key-manager__input';
-    input.placeholder = 'APIキーを入力';
+    input.placeholder = t('apiKeyManager.placeholder');
     input.autocomplete = 'off';
     // 現在キーが設定済みならプレースホルダー的に表示（実際のキー値は入れない）
     if (state.geminiApiKey) {
@@ -70,17 +72,17 @@ export function initApiKeyManagerUI(container, state, options = {}) {
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'api-key-manager__toggle-btn';
-    btn.textContent = '表示';
-    btn.title = 'APIキーの表示/非表示を切り替え';
+    btn.textContent = t('apiKeyManager.show');
+    btn.title = t('apiKeyManager.toggleTitle');
     btn.addEventListener('click', () => {
       if (inputEl.type === 'password') {
         // マスク → 判読可能（要件3.8）
         inputEl.type = 'text';
-        btn.textContent = '非表示';
+        btn.textContent = t('apiKeyManager.hide');
       } else {
         // 判読可能 → マスク（要件3.9）
         inputEl.type = 'password';
-        btn.textContent = '表示';
+        btn.textContent = t('apiKeyManager.show');
       }
     });
     return btn;
@@ -94,20 +96,20 @@ export function initApiKeyManagerUI(container, state, options = {}) {
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'api-key-manager__set-btn';
-    btn.textContent = '設定';
+    btn.textContent = t('apiKeyManager.setButton');
     btn.addEventListener('click', () => {
       const rawValue = inputEl.value;
       const success = state.setGeminiApiKey(rawValue);
       if (success) {
         // trim後1文字以上 → 保持してAI実行可能状態にする（要件3.5/3.7）
-        showFeedback('APIキーを設定しました。', 'success');
+        showFeedback(t('apiKeyManager.setSuccess'), 'success');
         updateStatus();
         if (typeof onKeyChange === 'function') {
           onKeyChange(true);
         }
       } else {
         // 空白のみ → 変更せずメッセージ表示（要件3.6）
-        showFeedback('APIキーを入力してください。', 'error');
+        showFeedback(t('apiKeyManager.setEmptyError'), 'error');
       }
     });
     return btn;
@@ -121,12 +123,12 @@ export function initApiKeyManagerUI(container, state, options = {}) {
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'api-key-manager__clear-btn';
-    btn.textContent = '消去';
+    btn.textContent = t('apiKeyManager.clearButton');
     btn.addEventListener('click', () => {
       state.clearGeminiApiKey();
       // 入力欄を空に戻す（要件5.6）
       inputEl.value = '';
-      showFeedback('APIキーを消去しました。', 'info');
+      showFeedback(t('apiKeyManager.cleared'), 'info');
       updateStatus();
       if (typeof onKeyChange === 'function') {
         onKeyChange(false);
@@ -144,7 +146,7 @@ export function initApiKeyManagerUI(container, state, options = {}) {
     wrapper.className = 'api-key-manager__link-wrapper';
 
     const text = document.createElement('span');
-    text.textContent = 'APIキーの取得 → ';
+    text.textContent = t('apiKeyManager.linkPrefix');
 
     const link = document.createElement('a');
     link.href = 'https://aistudio.google.com/apikey';
@@ -168,9 +170,9 @@ export function initApiKeyManagerUI(container, state, options = {}) {
     wrapper.className = 'api-key-manager__notices';
 
     const notices = [
-      'APIキーはブラウザのメモリにのみ保持され、ページをリロードすると消去されます',
-      'APIキーを第三者と共有しないでください',
-      'Google AI Studio の無料枠・レート制限の範囲でご利用ください',
+      t('apiKeyManager.notice1'),
+      t('apiKeyManager.notice2'),
+      t('apiKeyManager.notice3'),
     ];
 
     for (const notice of notices) {
@@ -202,10 +204,10 @@ export function initApiKeyManagerUI(container, state, options = {}) {
     if (!statusEl) return;
     // textContent でセキュリティを担保
     if (state.geminiApiKey) {
-      statusEl.textContent = '✓ APIキー設定済み — AI変換を利用できます';
+      statusEl.textContent = t('apiKeyManager.statusSet');
       statusEl.className = 'api-key-manager__status api-key-manager__status--set';
     } else {
-      statusEl.textContent = '✗ APIキーが未設定です — AI変換を利用するにはAPIキーの設定が必要です';
+      statusEl.textContent = t('apiKeyManager.statusUnset');
       statusEl.className = 'api-key-manager__status api-key-manager__status--unset';
     }
   }
@@ -242,7 +244,7 @@ export function initApiKeyManagerUI(container, state, options = {}) {
     // セクション見出し
     const heading = document.createElement('h3');
     heading.className = 'api-key-manager__heading';
-    heading.textContent = 'Gemini APIキー';
+    heading.textContent = t('apiKeyManager.heading');
     root.appendChild(heading);
 
     // ステータス表示（要件4.1/4.2）

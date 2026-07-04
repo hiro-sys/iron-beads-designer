@@ -16,14 +16,15 @@
 // =============================================================================
 
 import { VALID_INPUT_MODES } from '../state.js';
+import { t } from '../i18n.js';
 
 /**
- * 入力方法の選択肢定義（value: 表示ラベル）。
- * @type {Array<{value: string, label: string}>}
+ * 入力方法の選択肢定義（value: 表示ラベルの翻訳キー）。
+ * @type {Array<{value: string, labelKey: string}>}
  */
 const MODE_OPTIONS = [
-  { value: 'image', label: '📷 画像から' },
-  { value: 'prompt', label: '✨ AIお題から' },
+  { value: 'image', labelKey: 'ai.mode.image' },
+  { value: 'prompt', labelKey: 'ai.mode.prompt' },
 ];
 
 /**
@@ -83,7 +84,7 @@ export function initInputModeToggleUI(container, state, options = {}) {
 
     const groupName = 'input-mode';
 
-    for (const { value, label } of MODE_OPTIONS) {
+    for (const { value, labelKey } of MODE_OPTIONS) {
       const labelEl = document.createElement('label');
       labelEl.className = 'input-mode-toggle__option';
 
@@ -103,7 +104,7 @@ export function initInputModeToggleUI(container, state, options = {}) {
       const text = document.createElement('span');
       text.className = 'input-mode-toggle__option-label';
       // セキュリティのため textContent を使用（innerHTML 不使用）。
-      text.textContent = label;
+      text.textContent = t(labelKey);
 
       labelEl.appendChild(radio);
       labelEl.appendChild(text);

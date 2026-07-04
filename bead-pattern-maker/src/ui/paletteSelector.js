@@ -31,6 +31,7 @@
 // =============================================================================
 
 import { getPaletteForBeadType } from './beadTypeSelector.js';
+import { t, getColorName } from '../i18n.js';
 
 /**
  * @typedef {Object} BeadColor
@@ -208,7 +209,10 @@ export function initPaletteSelectorUI(container, state, options = {}) {
   function buildHeading(totalCount, activeCount) {
     const heading = document.createElement('div');
     heading.className = 'palette-selector__heading';
-    heading.textContent = `使用する色（有効 ${activeCount} / 全 ${totalCount} 色）`;
+    heading.textContent = t('paletteSelector.heading', {
+      active: activeCount,
+      total: totalCount,
+    });
     return heading;
   }
 
@@ -226,13 +230,13 @@ export function initPaletteSelectorUI(container, state, options = {}) {
 
     const labelText = document.createElement('span');
     labelText.className = 'palette-selector__max-colors-text';
-    labelText.textContent = '最大色数';
+    labelText.textContent = t('paletteSelector.maxColorsLabel');
 
     const input = document.createElement('input');
     input.type = 'number';
     input.min = '1';
     input.step = '1';
-    input.placeholder = '制限なし';
+    input.placeholder = t('paletteSelector.maxColorsPlaceholder');
     input.className = 'palette-selector__max-colors-input';
     // null（制限なし）のときは空欄、指定時はその値を表示する。
     input.value = state.maxColors == null ? '' : String(state.maxColors);
@@ -249,7 +253,9 @@ export function initPaletteSelectorUI(container, state, options = {}) {
     const hint = document.createElement('span');
     hint.className = 'palette-selector__max-colors-hint';
     hint.textContent =
-      state.maxColors == null ? '（制限なし）' : `（最大 ${state.maxColors} 色）`;
+      state.maxColors == null
+        ? t('paletteSelector.maxColorsHintUnlimited')
+        : t('paletteSelector.maxColorsHintLimited', { count: state.maxColors });
     wrap.appendChild(hint);
 
     return wrap;
@@ -270,7 +276,10 @@ export function initPaletteSelectorUI(container, state, options = {}) {
       (isDisabled ? ' palette-selector__swatch-button--disabled' : '');
     // aria-pressed=true を「有効（押下＝使用中）」として表現する。
     button.setAttribute('aria-pressed', String(!isDisabled));
-    button.title = `${color.id ?? ''} ${color.name}（${isDisabled ? '無効' : '有効'}）`.trim();
+    const statusLabel = isDisabled
+      ? t('paletteSelector.disabled')
+      : t('paletteSelector.enabled');
+    button.title = `${color.id ?? ''} ${getColorName(color)}（${statusLabel}）`.trim();
 
     // 色見本（矩形）。背景色は動的なのでインラインで設定する。
     // CSS未整備でも矩形として視認できるよう最小限のスタイルを付与する。
@@ -287,7 +296,7 @@ export function initPaletteSelectorUI(container, state, options = {}) {
     // 色名（色見本だけでは判別しづらいため併記）。
     const name = document.createElement('span');
     name.className = 'palette-selector__swatch-name';
-    name.textContent = color.name;
+    name.textContent = getColorName(color);
     if (isDisabled) {
       // 無効であることをテキストでも示す。
       name.style.textDecoration = 'line-through';
@@ -331,7 +340,7 @@ export function initPaletteSelectorUI(container, state, options = {}) {
     const message = document.createElement('p');
     message.className = 'palette-selector__error';
     message.setAttribute('role', 'alert');
-    message.textContent = '最低1色を有効にしてください';
+    message.textContent = t('paletteSelector.emptyError');
     // CSS未整備でも警告と分かるよう赤テキストにする。
     message.style.color = '#cc0000';
     return message;

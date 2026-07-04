@@ -19,6 +19,7 @@
 // =============================================================================
 
 import { GEMINI_MODELS, VALID_GEMINI_MODELS } from '../state.js';
+import { t } from '../i18n.js';
 
 /**
  * Gemini モデルセレクタUIを初期化してコンテナに描画する。
@@ -85,13 +86,13 @@ export function initModelSelectorUI(container, state, options = {}) {
     const label = document.createElement('label');
     label.className = 'model-selector__label';
     label.setAttribute('for', 'gemini-model-select');
-    label.textContent = '使用するAIモデル';
+    label.textContent = t('modelSelector.label');
 
     // --- 補足の注意書き（掲載していないモデルの説明） ---
     const note = document.createElement('p');
     note.className = 'model-selector__note';
     // セキュリティのため textContent を使用（innerHTML 不使用）。
-    note.textContent = '※TTS・音声・Live系モデルは図案生成に使えないため掲載していません';
+    note.textContent = t('modelSelector.note');
 
     // --- <select> ---
     const select = document.createElement('select');
@@ -102,14 +103,14 @@ export function initModelSelectorUI(container, state, options = {}) {
     // 「無料枠で使える」グループを先に並べる。
     const groups = [
       {
-        label: '無料枠で使える',
+        label: t('modelSelector.groupFree'),
         models: GEMINI_MODELS.filter((m) => m.freeTier),
         suffix: '',
       },
       {
-        label: '無料枠では使えない',
+        label: t('modelSelector.groupPaid'),
         models: GEMINI_MODELS.filter((m) => !m.freeTier),
-        suffix: '（無料枠不可）',
+        suffix: t('modelSelector.paidSuffix'),
       },
     ];
 

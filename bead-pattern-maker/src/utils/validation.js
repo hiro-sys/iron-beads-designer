@@ -26,6 +26,7 @@
 // =============================================================================
 
 import { BEAD_CONFIG } from '../data/beadConfig.js';
+import { t } from '../i18n.js';
 
 /**
  * 画像アップロードで許可するMIMEタイプ（要件1.2: JPEG / PNG / GIF / WebP）。
@@ -154,10 +155,10 @@ export function validatePlateCount(value) {
  */
 export function validateImageFile(file) {
   if (!ALLOWED_TYPES.includes(file.type)) {
-    return { valid: false, error: '対応形式: JPEG、PNG、GIF、WebP' };
+    return { valid: false, error: t('validation.unsupportedFormat') };
   }
   if (file.size > MAX_FILE_SIZE) {
-    return { valid: false, error: 'ファイルサイズは10MB以下にしてください' };
+    return { valid: false, error: t('validation.fileTooLarge') };
   }
   return { valid: true };
 }
