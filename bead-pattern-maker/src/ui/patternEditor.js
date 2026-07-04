@@ -36,6 +36,7 @@
 import { initializePalette } from '../data/beadConfig.js';
 import { PARLER_PALETTE } from '../data/parlerPalette.js';
 import { NANO_PALETTE } from '../data/nanoPalette.js';
+import { t, getColorName } from '../i18n.js';
 
 /** @typedef {import('../engine/ConversionStrategy.js').PatternGrid} PatternGrid */
 /** @typedef {import('../engine/ConversionStrategy.js').BeadColor} BeadColor */
@@ -316,7 +317,7 @@ export function initPatternEditorUI(canvas, toolContainer, state, optionsOrOnPat
 
     const heading = document.createElement('div');
     heading.className = 'pattern-editor__heading';
-    heading.textContent = '編集ツール';
+    heading.textContent = t('patternEditor.heading');
     root.appendChild(heading);
 
     const tools = document.createElement('div');
@@ -336,8 +337,8 @@ export function initPatternEditorUI(canvas, toolContainer, state, optionsOrOnPat
       btn.style.width = '24px';
       btn.style.height = '24px';
       // 色名はテキスト併記しないため、アクセシブルネームを付与する。
-      const accessibleName =
-        color.id !== undefined ? `${color.id} ${color.name}` : color.name;
+      const colorName = getColorName(color);
+      const accessibleName = color.id !== undefined ? `${color.id} ${colorName}` : colorName;
       btn.title = accessibleName;
       btn.setAttribute('aria-label', accessibleName);
 
@@ -355,7 +356,7 @@ export function initPatternEditorUI(canvas, toolContainer, state, optionsOrOnPat
     const eraser = document.createElement('button');
     eraser.type = 'button';
     eraser.className = 'pattern-editor__tool pattern-editor__tool--eraser';
-    eraser.textContent = '消しゴム（未配置）';
+    eraser.textContent = t('patternEditor.eraser');
     const eraserSelected = Boolean(editTool && editTool.type === 'erase');
     eraser.setAttribute('aria-pressed', String(eraserSelected));
     if (eraserSelected) {

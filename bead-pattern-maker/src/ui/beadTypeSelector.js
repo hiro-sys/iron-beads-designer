@@ -29,6 +29,18 @@ import { BEAD_CONFIG, initializePalette } from '../data/beadConfig.js';
 import { PARLER_PALETTE } from '../data/parlerPalette.js';
 import { NANO_PALETTE } from '../data/nanoPalette.js';
 import { remapPattern } from '../engine/colorMatcher.js';
+import { t, getColorName } from '../i18n.js';
+
+/**
+ * ビーズタイプ → 表示ラベルの翻訳キー対応表。
+ * BEAD_CONFIG.label（日本語固定）は内部識別・他モジュールの互換性のために残し、
+ * UI表示は i18n 辞書のキー経由でロケールに応じた文言を取得する。
+ * @type {Record<string, string>}
+ */
+const BEAD_TYPE_LABEL_KEYS = {
+  perler: 'beadConfig.perler',
+  nano: 'beadConfig.nano',
+};
 
 /** @typedef {'perler' | 'nano'} BeadType */
 
@@ -74,7 +86,7 @@ function buildOptions(currentBeadType, onSelect) {
 
   const legend = document.createElement('legend');
   legend.className = 'bead-type-selector__legend';
-  legend.textContent = 'ビーズタイプ';
+  legend.textContent = t('beadType.legend');
   fieldset.appendChild(legend);
 
   // 同一ラジオグループにまとめるための name。
@@ -99,7 +111,7 @@ function buildOptions(currentBeadType, onSelect) {
 
     const text = document.createElement('span');
     text.className = 'bead-type-selector__option-label';
-    text.textContent = config.label;
+    text.textContent = t(BEAD_TYPE_LABEL_KEYS[type] ?? config.label);
 
     label.appendChild(radio);
     label.appendChild(text);
@@ -126,7 +138,7 @@ function buildPalette(palette) {
   // 何色あるかの見出し（要件2.3: 全単色の一覧であることを明示）。
   const heading = document.createElement('div');
   heading.className = 'bead-type-selector__palette-heading';
-  heading.textContent = `カラーパレット（${palette.length}色）`;
+  heading.textContent = t('beadType.paletteHeading', { count: palette.length });
   wrapper.appendChild(heading);
 
   const list = document.createElement('ul');
@@ -136,7 +148,7 @@ function buildPalette(palette) {
     const item = document.createElement('li');
     item.className = 'bead-type-selector__color';
     // ホバーで「ID 色名」を表示（色見本だけでは判別しづらいため）。
-    item.title = `${color.id} ${color.name}`;
+    item.title = `${color.id} ${getColorName(color)}`;
 
     // 色見本（矩形）。背景色は動的なのでインラインで設定する。
     const swatch = document.createElement('span');
@@ -151,7 +163,7 @@ function buildPalette(palette) {
     // 色名（要件2.3）。
     const name = document.createElement('span');
     name.className = 'bead-type-selector__color-name';
-    name.textContent = color.name;
+    name.textContent = getColorName(color);
 
     item.appendChild(swatch);
     item.appendChild(name);

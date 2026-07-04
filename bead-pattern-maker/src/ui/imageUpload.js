@@ -33,13 +33,14 @@
 // =============================================================================
 
 import { validateImageFile } from '../utils/validation.js';
+import { t } from '../i18n.js';
 
 /**
- * 画像読み込み失敗時に表示するメッセージ（要件1.5）。
+ * 画像読み込み失敗時に表示するメッセージの辞書キー（要件1.5）。
  * FileReader / Image いずれの失敗もユーザー視点では「読み込み失敗」として扱う。
  * @type {string}
  */
-const READ_ERROR_MESSAGE = '画像の読み込みに失敗しました。別のファイルを選択してください。';
+const READ_ERROR_MESSAGE_KEY = 'imageUpload.readError';
 
 /**
  * エラーメッセージを自動消去するまでの時間（ミリ秒）。
@@ -112,7 +113,7 @@ export function initImageUploadUI(container, options = {}) {
   const label = document.createElement('label');
   label.className = 'image-upload__label';
   label.setAttribute('for', inputId);
-  label.textContent = '画像ファイルを選択、またはここにドラッグ&ドロップ';
+  label.textContent = t('imageUpload.label');
 
   const input = document.createElement('input');
   input.className = 'image-upload__input';
@@ -141,7 +142,7 @@ export function initImageUploadUI(container, options = {}) {
 
   const previewImg = document.createElement('img');
   previewImg.className = 'image-upload__preview-img';
-  previewImg.alt = 'アップロードした画像のプレビュー';
+  previewImg.alt = t('imageUpload.previewAlt');
   previewImg.style.display = 'none';
   previewImg.style.maxWidth = '100%';
   previewWrap.appendChild(previewImg);
@@ -230,7 +231,7 @@ export function initImageUploadUI(container, options = {}) {
       })
       .catch(() => {
         // 読み込み失敗。エラーを表示しつつ、入力欄は無効化せず再選択を維持する。
-        showError(READ_ERROR_MESSAGE);
+        showError(t(READ_ERROR_MESSAGE_KEY));
       });
   }
 

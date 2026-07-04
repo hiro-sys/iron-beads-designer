@@ -23,6 +23,7 @@
 // =============================================================================
 
 import { validatePlateCount, createEmptyGrid } from '../utils/validation.js';
+import { t } from '../i18n.js';
 
 /** プレート枚数の下限・上限（要件3.1, 3.2）。input要素の min/max にも用いる。 */
 const PLATE_MIN = 1;
@@ -119,12 +120,12 @@ export function initPlateConfigUI(container, state, { onPlateConfigChange } = {}
   const root = document.createElement('div');
   root.className = 'plate-config';
 
-  const colsField = createAxisField(`${idBase}-cols`, '横（列）', current.cols);
+  const colsField = createAxisField(`${idBase}-cols`, t('plateConfig.cols'), current.cols);
   const separator = document.createElement('span');
   separator.className = 'plate-config__separator';
   separator.textContent = '×';
   separator.setAttribute('aria-hidden', 'true');
-  const rowsField = createAxisField(`${idBase}-rows`, '縦（行）', current.rows);
+  const rowsField = createAxisField(`${idBase}-rows`, t('plateConfig.rows'), current.rows);
 
   root.appendChild(colsField.field);
   root.appendChild(separator);
@@ -195,9 +196,7 @@ export function initPlateConfigUI(container, state, { onPlateConfigChange } = {}
     // 要件3.7: 既存図案があるときはクリア確認を求める。
     const hasPattern = state.pattern !== null && state.pattern !== undefined;
     if (hasPattern) {
-      const confirmed = window.confirm(
-        'プレート構成を変更すると、現在の図案データはクリアされます。変更しますか？',
-      );
+      const confirmed = window.confirm(t('plateConfig.confirmClear'));
       if (!confirmed) {
         // キャンセル時は直前の有効値に戻し、何も変更しない。
         inputEl.value = String(config[axis]);

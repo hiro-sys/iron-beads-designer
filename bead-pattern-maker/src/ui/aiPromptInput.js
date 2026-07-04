@@ -32,6 +32,8 @@
  * @returns {{ refresh: function(): void, destroy: function(): void }}
  *          外部から再同期（refresh）・破棄（destroy）できるハンドル
  */
+import { t } from '../i18n.js';
+
 export function initAiPromptInputUI(container, state, options = {}) {
   // コンテナが無い場合は no-op ハンドルを返し、呼び出し側がクラッシュしないようにする。
   if (!container) {
@@ -76,14 +78,14 @@ export function initAiPromptInputUI(container, state, options = {}) {
     const label = document.createElement('label');
     label.className = 'ai-prompt-input__label';
     label.setAttribute('for', 'ai-prompt-field');
-    label.textContent = 'お題（AIが描くモチーフ）';
+    label.textContent = t('aiPromptInput.label');
 
     // --- テキスト入力 ---
     const input = document.createElement('input');
     input.type = 'text';
     input.id = 'ai-prompt-field';
     input.className = 'ai-prompt-input__field';
-    input.placeholder = '例: ねこ / ハート / 星';
+    input.placeholder = t('aiPromptInput.placeholder');
     input.value = state.aiPrompt || '';
     input.autocomplete = 'off';
     input.addEventListener('input', () => {
@@ -96,7 +98,7 @@ export function initAiPromptInputUI(container, state, options = {}) {
     const notice = document.createElement('p');
     notice.className = 'ai-prompt-input__notice';
     // セキュリティのため textContent を使用（innerHTML 不使用）。
-    notice.textContent = '入力したお題はGoogle（Gemini API）へ送信されます';
+    notice.textContent = t('aiPromptInput.notice');
 
     root.appendChild(label);
     root.appendChild(input);

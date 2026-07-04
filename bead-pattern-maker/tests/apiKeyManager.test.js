@@ -7,15 +7,19 @@
 // Requirements: 3.1, 3.2, 3.3, 3.4, 3.6, 3.8, 3.9, 4.1, 4.2, 5.5, 5.6, 5.7, 8.6
 // =============================================================================
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { initApiKeyManagerUI } from '../src/ui/apiKeyManager.js';
 import { createAppState } from '../src/state.js';
+import { setLocale } from '../src/i18n.js';
 
 describe('apiKeyManager', () => {
   let container;
   let state;
 
   beforeEach(() => {
+    // 本テストは日本語の文言を直接検証するため、実行環境（jsdom既定は en-US）に
+    // 依存せずロケールを 'ja' に固定する。i18n.js 導入前からの既存テスト互換のため。
+    setLocale('ja');
     container = document.createElement('div');
     document.body.appendChild(container);
     state = createAppState();
